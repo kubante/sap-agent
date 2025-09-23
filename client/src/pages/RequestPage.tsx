@@ -6,6 +6,10 @@ import {
   TextField,
   Alert,
   CircularProgress,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from "@mui/material";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -18,16 +22,35 @@ import dayjs from "dayjs";
 
 export default function RequestPage() {
   const { tenant } = useTenant();
-  const [selectedDateTime, setSelectedDateTime] = useState<Dayjs | null>(
-    dayjs()
-  );
-  const [name, setName] = useState("");
+  const [scheduledTime, setScheduledTime] = useState<Dayjs | null>(dayjs());
+  const [latitude, setLatitude] = useState("");
+  const [longitude, setLongitude] = useState("");
+  const [selectedCity, setSelectedCity] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
+  // City options with coordinates
+  const cities = [
+    { name: "Berlin", lat: 52.52, lng: 13.405 },
+    { name: "Rome", lat: 41.9028, lng: 12.4964 },
+    { name: "Belgrade", lat: 44.7866, lng: 20.4489 },
+    { name: "Kalamata", lat: 37.0366, lng: 22.1144 },
+    { name: "Athens", lat: 37.9838, lng: 23.7275 },
+  ];
+
+  const handleCityChange = (event: any) => {
+    const cityName = event.target.value;
+    setSelectedCity(cityName);
+    const city = cities.find((c) => c.name === cityName);
+    if (city) {
+      setLatitude(city.lat.toString());
+      setLongitude(city.lng.toString());
+    }
+  };
+
   const handleSubmit = async () => {
-    if (!name.trim() || !selectedDateTime) {
+    if (!scheduledTime || !latitude.trim() || !longitude.trim()) {
       setError("Please fill in all required fields");
       return;
     }
@@ -43,10 +66,15 @@ export default function RequestPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          name,
-          scheduledDate: selectedDateTime.toISOString(),
-          status: "scheduled", // Default status
+          name: selectedCity
+            ? `Weather - ${selectedCity}`
+            : `Weather - ${latitude}, ${longitude}`,
+          scheduledDate: scheduledTime.toISOString(),
           tenantId: tenant,
+          data: {
+            latitude: parseFloat(latitude),
+            longitude: parseFloat(longitude),
+          },
         }),
       });
 
@@ -59,8 +87,10 @@ export default function RequestPage() {
       setSuccess(`Job created successfully! ID: ${jobData.id}`);
 
       // Reset form
-      setName("");
-      setSelectedDateTime(dayjs());
+      setLatitude("");
+      setLongitude("");
+      setSelectedCity("");
+      setScheduledTime(dayjs());
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
@@ -102,19 +132,10 @@ export default function RequestPage() {
             maxWidth: 600,
           }}
         >
-          <TextField
-            label="Job Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            variant="outlined"
-            fullWidth
-            required
-          />
-
           <DateTimePicker
             label="Scheduled Date and Time"
-            value={selectedDateTime}
-            onChange={(newValue) => setSelectedDateTime(newValue)}
+            value={scheduledTime}
+            onChange={(newValue) => setScheduledTime(newValue)}
             slotProps={{
               textField: {
                 variant: "outlined",
@@ -123,11 +144,65 @@ export default function RequestPage() {
             }}
           />
 
+          <FormControl fullWidth>
+            <InputLabel>Select a City (Optional)</InputLabel>
+            <Select
+              value={selectedCity}
+              onChange={handleCityChange}
+              label="Select a City (Optional)"
+            >
+              <MenuItem value="">
+                <em>None</em>
+              </MenuItem>
+              {cities.map((city) => (
+                <MenuItem key={city.name} value={city.name}>
+                  {city.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <Box sx={{ display: "flex", gap: 2 }}>
+            <TextField
+              label="Latitude"
+              type="number"
+              value={latitude}
+              onChange={(e) => setLatitude(e.target.value)}
+              variant="outlined"
+              fullWidth
+              required
+              inputProps={{
+                step: "any",
+                min: -90,
+                max: 90,
+              }}
+            />
+            <TextField
+              label="Longitude"
+              type="number"
+              value={longitude}
+              onChange={(e) => setLongitude(e.target.value)}
+              variant="outlined"
+              fullWidth
+              required
+              inputProps={{
+                step: "any",
+                min: -180,
+                max: 180,
+              }}
+            />
+          </Box>
+
           <Box sx={{ display: "flex", gap: 2 }}>
             <Button
               variant="contained"
               onClick={handleSubmit}
-              disabled={!selectedDateTime || !name.trim() || isLoading}
+              disabled={
+                !scheduledTime ||
+                !latitude.trim() ||
+                !longitude.trim() ||
+                isLoading
+              }
               startIcon={isLoading ? <CircularProgress size={20} /> : null}
             >
               {isLoading ? "Creating Job..." : "Create Job"}
@@ -135,8 +210,10 @@ export default function RequestPage() {
             <Button
               variant="outlined"
               onClick={() => {
-                setName("");
-                setSelectedDateTime(dayjs());
+                setLatitude("");
+                setLongitude("");
+                setSelectedCity("");
+                setScheduledTime(dayjs());
                 setError(null);
                 setSuccess(null);
               }}
