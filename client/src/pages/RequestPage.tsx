@@ -1,6 +1,7 @@
 import { Paper, Typography, Box, Button, TextField } from "@mui/material";
 import { useState } from "react";
 import { useTenant } from "../contexts/TenantContext";
+import InvalidTenant from "../components/InvalidTenant";
 
 export default function RequestPage() {
   const { tenant } = useTenant();
@@ -12,16 +13,7 @@ export default function RequestPage() {
   };
 
   if (!tenant) {
-    return (
-      <Paper sx={{ p: 3 }}>
-        <Typography variant="h4" gutterBottom>
-          Invalid Tenant
-        </Typography>
-        <Typography variant="body1">
-          Please navigate to a valid tenant page.
-        </Typography>
-      </Paper>
-    );
+    return <InvalidTenant />;
   }
 
   return (

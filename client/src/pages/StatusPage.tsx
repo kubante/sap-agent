@@ -10,6 +10,7 @@ import {
   TableRow,
 } from "@mui/material";
 import { useTenant } from "../contexts/TenantContext";
+import InvalidTenant from "../components/InvalidTenant";
 
 interface Job {
   id: string;
@@ -68,16 +69,7 @@ export default function StatusPage() {
   };
 
   if (!tenant) {
-    return (
-      <Paper sx={{ p: 3 }}>
-        <Typography variant="h4" gutterBottom>
-          Invalid Tenant
-        </Typography>
-        <Typography variant="body1">
-          Please navigate to a valid tenant page.
-        </Typography>
-      </Paper>
-    );
+    return <InvalidTenant />;
   }
 
   return (

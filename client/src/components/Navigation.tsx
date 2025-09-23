@@ -9,7 +9,7 @@ export default function Navigation() {
   const { tenant: currentTenant } = useTenant();
 
   return (
-    <AppBar position="static">
+    <AppBar position="static" elevation={0}>
       <Toolbar>
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
           Meteo Agent {currentTenant && `- ${capitalize(currentTenant)}`}
