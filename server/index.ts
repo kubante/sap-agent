@@ -17,7 +17,7 @@ const jobs: Job[] = [];
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
+// Middleware for handling json
 app.use(express.json());
 
 // GET /jobs - Retrieve all jobs
