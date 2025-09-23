@@ -1,5 +1,5 @@
-import axios from "axios";
 import express from "express";
+import { WeatherDataService } from "./WeatherData.ts";
 
 // Define the Job interface
 interface Job {
@@ -13,40 +13,11 @@ interface Job {
   data?: any;
 }
 
-// Weather data interface
-interface WeatherData {
-  latitude: number;
-  longitude: number;
-  current: {
-    time: string;
-    temperature_2m: number;
-    wind_speed_10m: number;
-  };
-  hourly: {
-    time: string[];
-    temperature_2m: number[];
-    relative_humidity_2m: number[];
-    wind_speed_10m: number[];
-  };
-}
-
 // In-memory storage for jobs
 const jobs: Job[] = [];
 
-async function fetchWeatherData(
-  latitude: number,
-  longitude: number
-): Promise<WeatherData | null> {
-  try {
-    const response = await axios.get(
-      `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,wind_speed_10m&hourly=temperature_2m,relative_humidity_2m,wind_speed_10m`
-    );
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching weather data:", error);
-    return null;
-  }
-}
+// Initialize weather data service
+const weatherService = new WeatherDataService();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -81,43 +52,27 @@ app.post("/api/job", async (req, res) => {
     });
   }
 
-  // Validate that data contains required coordinates
-  if (!data.latitude || !data.longitude) {
+  // Validate weather request data using the WeatherDataService
+  const validationResult =
+    weatherService.validateAndProcessWeatherRequest(data);
+
+  if (!validationResult.isValid) {
     return res.status(400).json({
-      error:
-        "Missing required coordinates: latitude and longitude are required in data object",
+      error: "Validation failed",
+      details: validationResult.errors,
     });
   }
 
-  // Extract and validate coordinates
-  const lat = parseFloat(data.latitude);
-  const lng = parseFloat(data.longitude);
-
-  // Validate coordinate ranges
-  if (isNaN(lat) || isNaN(lng)) {
-    return res.status(400).json({
-      error:
-        "Invalid coordinates: latitude and longitude must be valid numbers",
-    });
-  }
-
-  if (lat < -90 || lat > 90) {
-    return res.status(400).json({
-      error: "Invalid latitude: must be between -90 and 90 degrees",
-    });
-  }
-
-  if (lng < -180 || lng > 180) {
-    return res.status(400).json({
-      error: "Invalid longitude: must be between -180 and 180 degrees",
-    });
-  }
+  const { latitude, longitude } = validationResult.coordinates!;
 
   // Fetch weather data
   console.log(
-    `Fetching weather data for new job at coordinates: ${lat}, ${lng}`
+    `Fetching weather data for new job at coordinates: ${latitude}, ${longitude}`
   );
-  const weatherData = await fetchWeatherData(lat, lng);
+  const weatherData = await weatherService.fetchWeatherData(
+    latitude,
+    longitude
+  );
 
   // Create new job
   const newJob: Job = {
