@@ -8,9 +8,12 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  CircularProgress,
+  Alert,
 } from "@mui/material";
 import { useTenant } from "../contexts/TenantContext";
 import InvalidTenant from "../components/InvalidTenant";
+import { useState, useEffect } from "react";
 
 interface Job {
   id: string;
@@ -24,36 +27,36 @@ interface Job {
 
 export default function StatusPage() {
   const { tenant } = useTenant();
-  // Mock data - in a real app, this would come from an API
-  const mockRequests: Job[] = [
-    {
-      id: "1",
-      name: "Database Migration Request",
-      status: "completed",
-      createdDate: "2024-01-15T10:30:00Z",
-      scheduledDate: "2024-01-15T14:45:00Z",
-      tags: [],
-      tenantId: "filip",
-    },
-    {
-      id: "2",
-      name: "API Integration Request",
-      status: "scheduled",
-      createdDate: "2024-01-16T09:15:00Z",
-      scheduledDate: "2024-01-16T11:20:00Z",
-      tags: [],
-      tenantId: "filip",
-    },
-    {
-      id: "3",
-      name: "Security Audit Request",
-      status: "scheduled",
-      createdDate: "2024-01-17T08:00:00Z",
-      scheduledDate: "2024-01-17T08:00:00Z",
-      tags: [],
-      tenantId: "filip",
-    },
-  ];
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch jobs from API
+  useEffect(() => {
+    const fetchJobs = async () => {
+      if (!tenant) return;
+
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await fetch(`/api/jobs?tenantId=${tenant}`);
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        setJobs(data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to fetch jobs");
+        console.error("Error fetching jobs:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchJobs();
+  }, [tenant]);
 
   const getStatusColor = (status: Job["status"]) => {
     switch (status) {
@@ -70,6 +73,25 @@ export default function StatusPage() {
 
   if (!tenant) {
     return <InvalidTenant />;
+  }
+
+  if (loading) {
+    return (
+      <Paper sx={{ p: 3, textAlign: "center" }}>
+        <CircularProgress />
+        <Typography variant="body1" sx={{ mt: 2 }}>
+          Loading jobs...
+        </Typography>
+      </Paper>
+    );
+  }
+
+  if (error) {
+    return (
+      <Paper sx={{ p: 3 }}>
+        <Alert severity="error">Error loading jobs: {error}</Alert>
+      </Paper>
+    );
   }
 
   return (
@@ -93,22 +115,22 @@ export default function StatusPage() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {mockRequests.map((request) => (
-              <TableRow key={request.id}>
-                <TableCell>{request.id}</TableCell>
-                <TableCell>{request.name}</TableCell>
+            {jobs.map((job) => (
+              <TableRow key={job.id}>
+                <TableCell>{job.id}</TableCell>
+                <TableCell>{job.name}</TableCell>
                 <TableCell>
                   <Chip
-                    label={request.status}
-                    color={getStatusColor(request.status) as any}
+                    label={job.status}
+                    color={getStatusColor(job.status) as any}
                     size="small"
                   />
                 </TableCell>
                 <TableCell>
-                  {new Date(request.createdDate).toLocaleDateString()}
+                  {new Date(job.createdDate).toLocaleDateString()}
                 </TableCell>
                 <TableCell>
-                  {new Date(request.scheduledDate).toLocaleDateString()}
+                  {new Date(job.scheduledDate).toLocaleDateString()}
                 </TableCell>
               </TableRow>
             ))}
