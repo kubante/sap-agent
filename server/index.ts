@@ -52,9 +52,19 @@ const PORT = process.env.PORT || 3000;
 // Middleware for handling json
 app.use(express.json());
 
-// GET /jobs - Retrieve all jobs
+// GET /jobs - Retrieve jobs filtered by tenantId
 app.get("/api/jobs", (req, res) => {
-  res.json(jobs);
+  const { tenantId } = req.query;
+
+  if (!tenantId) {
+    return res.status(400).json({
+      error: "Missing required parameter: tenantId is required",
+    });
+  }
+
+  // Filter jobs by tenantId
+  const filteredJobs = jobs.filter((job) => job.tenantId === tenantId);
+  res.json(filteredJobs);
 });
 
 // POST /job - Create a new job
@@ -89,19 +99,10 @@ app.post("/api/job", async (req, res) => {
     status,
     tags: tags || [],
     tenantId,
-    data: weatherData || undefined,
+    data: weatherData?.current || undefined,
   };
 
   jobs.push(newJob);
-
-  console.log(`Job created with ID: ${newJob.id}`);
-  if (weatherData) {
-    console.log(
-      `Weather data fetched - Current temperature: ${weatherData.current.temperature_2m}°C`
-    );
-  } else {
-    console.log("Failed to fetch weather data");
-  }
 
   res.status(201).json(newJob);
 });
