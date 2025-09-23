@@ -127,10 +127,10 @@ export default function StatusPage() {
                   />
                 </TableCell>
                 <TableCell>
-                  {new Date(job.createdDate).toLocaleDateString()}
+                  {new Date(job.createdDate).toLocaleString()}
                 </TableCell>
                 <TableCell>
-                  {new Date(job.scheduledDate).toLocaleDateString()}
+                  {new Date(job.scheduledDate).toLocaleString()}
                 </TableCell>
               </TableRow>
             ))}
