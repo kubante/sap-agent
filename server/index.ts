@@ -81,9 +81,37 @@ app.post("/api/job", async (req, res) => {
     });
   }
 
-  // Extract coordinates from data object (optional, with defaults)
-  const lat = data.latitude || 52.52; // Default to Berlin
-  const lng = data.longitude || 13.41; // Default to Berlin
+  // Validate that data contains required coordinates
+  if (!data.latitude || !data.longitude) {
+    return res.status(400).json({
+      error:
+        "Missing required coordinates: latitude and longitude are required in data object",
+    });
+  }
+
+  // Extract and validate coordinates
+  const lat = parseFloat(data.latitude);
+  const lng = parseFloat(data.longitude);
+
+  // Validate coordinate ranges
+  if (isNaN(lat) || isNaN(lng)) {
+    return res.status(400).json({
+      error:
+        "Invalid coordinates: latitude and longitude must be valid numbers",
+    });
+  }
+
+  if (lat < -90 || lat > 90) {
+    return res.status(400).json({
+      error: "Invalid latitude: must be between -90 and 90 degrees",
+    });
+  }
+
+  if (lng < -180 || lng > 180) {
+    return res.status(400).json({
+      error: "Invalid longitude: must be between -180 and 180 degrees",
+    });
+  }
 
   // Fetch weather data
   console.log(
