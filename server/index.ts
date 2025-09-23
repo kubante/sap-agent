@@ -33,11 +33,13 @@ interface WeatherData {
 // In-memory storage for jobs
 const jobs: Job[] = [];
 
-// Function to fetch weather data
-async function fetchWeatherData(): Promise<WeatherData | null> {
+async function fetchWeatherData(
+  latitude: number,
+  longitude: number
+): Promise<WeatherData | null> {
   try {
     const response = await axios.get(
-      "https://api.open-meteo.com/v1/forecast?latitude=52.52&longitude=13.41&current=temperature_2m,wind_speed_10m&hourly=temperature_2m,relative_humidity_2m,wind_speed_10m"
+      `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,wind_speed_10m&hourly=temperature_2m,relative_humidity_2m,wind_speed_10m`
     );
     return response.data;
   } catch (error) {
@@ -69,26 +71,25 @@ app.get("/api/jobs", (req, res) => {
 
 // POST /job - Create a new job
 app.post("/api/job", async (req, res) => {
-  const { name, scheduledDate, status, tags, tenantId } = req.body;
+  const { name, scheduledDate, tags, tenantId, data } = req.body;
 
   // Validate required fields
-  if (!name || !scheduledDate || !status || !tenantId) {
+  if (!name || !scheduledDate || !tenantId || !data) {
     return res.status(400).json({
       error:
-        "Missing required fields: name, scheduledDate, status, tenantId are required",
+        "Missing required fields: name, scheduledDate, tenantId and data are required",
     });
   }
 
-  // Validate status
-  if (!["completed", "scheduled", "failed"].includes(status)) {
-    return res.status(400).json({
-      error: "Invalid status. Must be one of: completed, scheduled, failed",
-    });
-  }
+  // Extract coordinates from data object (optional, with defaults)
+  const lat = data.latitude || 52.52; // Default to Berlin
+  const lng = data.longitude || 13.41; // Default to Berlin
 
   // Fetch weather data
-  console.log("Fetching weather data for new job...");
-  const weatherData = await fetchWeatherData();
+  console.log(
+    `Fetching weather data for new job at coordinates: ${lat}, ${lng}`
+  );
+  const weatherData = await fetchWeatherData(lat, lng);
 
   // Create new job
   const newJob: Job = {
@@ -96,7 +97,7 @@ app.post("/api/job", async (req, res) => {
     name,
     createdDate: new Date(),
     scheduledDate: new Date(scheduledDate),
-    status,
+    status: "scheduled",
     tags: tags || [],
     tenantId,
     data: weatherData?.current || undefined,
