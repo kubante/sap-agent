@@ -1,4 +1,12 @@
-import { Paper, Typography, Box, Button } from "@mui/material";
+import {
+  Paper,
+  Typography,
+  Box,
+  Button,
+  TextField,
+  Alert,
+  CircularProgress,
+} from "@mui/material";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -13,10 +21,51 @@ export default function RequestPage() {
   const [selectedDateTime, setSelectedDateTime] = useState<Dayjs | null>(
     dayjs()
   );
+  const [name, setName] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
-  const handleSubmit = () => {
-    console.log(`Request submitted for ${tenant}:`, selectedDateTime);
-    // TODO: Implement actual request submission
+  const handleSubmit = async () => {
+    if (!name.trim() || !selectedDateTime) {
+      setError("Please fill in all required fields");
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const response = await fetch("/api/job", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name,
+          scheduledDate: selectedDateTime.toISOString(),
+          status: "scheduled", // Default status
+          tenantId: tenant,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to create job");
+      }
+
+      const jobData = await response.json();
+      setSuccess(`Job created successfully! ID: ${jobData.id}`);
+
+      // Reset form
+      setName("");
+      setSelectedDateTime(dayjs());
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (!tenant) {
@@ -27,11 +76,23 @@ export default function RequestPage() {
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Paper sx={{ p: 3 }}>
         <Typography variant="h4" gutterBottom>
-          Request Page for {tenant}
+          Create Job for {tenant}
         </Typography>
         <Typography variant="body1" sx={{ mb: 3 }}>
-          Select a date and time for your request: {tenant}
+          Fill in the details to create a new job with weather data
         </Typography>
+
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {error}
+          </Alert>
+        )}
+
+        {success && (
+          <Alert severity="success" sx={{ mb: 2 }}>
+            {success}
+          </Alert>
+        )}
 
         <Box
           sx={{
@@ -41,8 +102,17 @@ export default function RequestPage() {
             maxWidth: 600,
           }}
         >
+          <TextField
+            label="Job Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            variant="outlined"
+            fullWidth
+            required
+          />
+
           <DateTimePicker
-            label="Select Date and Time"
+            label="Scheduled Date and Time"
             value={selectedDateTime}
             onChange={(newValue) => setSelectedDateTime(newValue)}
             slotProps={{
@@ -57,13 +127,20 @@ export default function RequestPage() {
             <Button
               variant="contained"
               onClick={handleSubmit}
-              disabled={!selectedDateTime}
+              disabled={!selectedDateTime || !name.trim() || isLoading}
+              startIcon={isLoading ? <CircularProgress size={20} /> : null}
             >
-              Submit Request
+              {isLoading ? "Creating Job..." : "Create Job"}
             </Button>
             <Button
               variant="outlined"
-              onClick={() => setSelectedDateTime(null)}
+              onClick={() => {
+                setName("");
+                setSelectedDateTime(dayjs());
+                setError(null);
+                setSuccess(null);
+              }}
+              disabled={isLoading}
             >
               Clear
             </Button>
