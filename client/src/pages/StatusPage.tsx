@@ -21,7 +21,7 @@ interface Job {
   createdDate: string;
   scheduledDate: string;
   status: "completed" | "scheduled" | "failed";
-  tags: string[];
+  type: "weather" | "countries";
   tenantId: string;
 }
 
@@ -108,6 +108,7 @@ export default function StatusPage() {
           <TableHead>
             <TableRow>
               <TableCell>ID</TableCell>
+              <TableCell>Type</TableCell>
               <TableCell>Name</TableCell>
               <TableCell>Status</TableCell>
               <TableCell>Created</TableCell>
@@ -118,6 +119,7 @@ export default function StatusPage() {
             {jobs.map((job) => (
               <TableRow key={job.id}>
                 <TableCell>{job.id}</TableCell>
+                <TableCell>{job.type}</TableCell>
                 <TableCell>{job.name}</TableCell>
                 <TableCell>
                   <Chip

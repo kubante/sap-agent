@@ -8,7 +8,7 @@ interface Job {
   createdDate: Date;
   scheduledDate: Date;
   status: "completed" | "scheduled" | "failed";
-  tags: string[];
+  type: "weather" | "countries";
   tenantId: string;
   data?: any;
 }
@@ -71,7 +71,7 @@ app.get("/api/jobs", (req, res) => {
 
 // POST /job - Create a new job
 app.post("/api/job", async (req, res) => {
-  const { name, scheduledDate, tags, tenantId, data } = req.body;
+  const { name, scheduledDate, type, tenantId, data } = req.body;
 
   // Validate required fields
   if (!name || !scheduledDate || !tenantId || !data) {
@@ -98,7 +98,7 @@ app.post("/api/job", async (req, res) => {
     createdDate: new Date(),
     scheduledDate: new Date(scheduledDate),
     status: "scheduled",
-    tags: tags || [],
+    type,
     tenantId,
     data: weatherData?.current || undefined,
   };

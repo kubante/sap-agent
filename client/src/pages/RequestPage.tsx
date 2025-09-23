@@ -66,11 +66,10 @@ export default function RequestPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          name: selectedCity
-            ? `Weather - ${selectedCity}`
-            : `Weather - ${latitude}, ${longitude}`,
+          name: selectedCity ? `${selectedCity}` : `${latitude}, ${longitude}`,
           scheduledDate: scheduledTime.toISOString(),
           tenantId: tenant,
+          type: "weather",
           data: {
             latitude: parseFloat(latitude),
             longitude: parseFloat(longitude),
