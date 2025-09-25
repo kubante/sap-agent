@@ -12,6 +12,10 @@ This travel agent application provides:
 - **Multi-tenant Support**: Serve different tenants (filip, abdullah, jacob) with isolated data
 - **Offline Capability**: Graceful fallback to mock data when internet connectivity is unavailable
 
+## Differences from provided mock-up
+
+- Instead of a super generic request composition UI I opted for a more user friendly approach to configure requests for both services
+
 ## 🛠️ Technologies Used
 
 ### Frontend
