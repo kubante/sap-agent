@@ -1,6 +1,7 @@
 import { useTenant } from "../../contexts/TenantContext";
 import InvalidTenant from "../../components/InvalidTenant";
-import WeatherFetcher from "../../components/WeatherFetcher";
+import WeatherFetcher from "./WeatherFetcher";
+import CountryFetcher from "./CountryFetcher";
 
 export default function RequestPage() {
   const { tenant } = useTenant();
@@ -9,5 +10,11 @@ export default function RequestPage() {
     return <InvalidTenant />;
   }
 
-  return <WeatherFetcher tenant={tenant} />;
+  return (
+    <>
+      <WeatherFetcher tenant={tenant} />
+      <br />
+      <CountryFetcher tenant={tenant} />
+    </>
+  );
 }

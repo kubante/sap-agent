@@ -19,40 +19,40 @@ import type { Dayjs } from "dayjs";
 import dayjs from "dayjs";
 import { capitalize } from "lodash";
 
-interface WeatherFetcherProps {
+interface CountryFetcherProps {
   tenant: string;
 }
 
-export default function WeatherFetcher({ tenant }: WeatherFetcherProps) {
+export default function CountryFetcher({ tenant }: CountryFetcherProps) {
   const [scheduledTime, setScheduledTime] = useState<Dayjs | null>(dayjs());
-  const [latitude, setLatitude] = useState("");
-  const [longitude, setLongitude] = useState("");
-  const [selectedCity, setSelectedCity] = useState("");
+  const [countryName, setCountryName] = useState("");
+  const [selectedCountry, setSelectedCountry] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  // City options with coordinates
-  const cities = [
-    { name: "Berlin", lat: 52.52, lng: 13.405 },
-    { name: "Rome", lat: 41.9028, lng: 12.4964 },
-    { name: "Belgrade", lat: 44.7866, lng: 20.4489 },
-    { name: "Kalamata", lat: 37.0366, lng: 22.1144 },
-    { name: "Athens", lat: 37.9838, lng: 23.7275 },
+  // Country options
+  const countries = [
+    { name: "Germany" },
+    { name: "Italy" },
+    { name: "Serbia" },
+    { name: "Greece" },
+    { name: "France" },
+    { name: "Spain" },
+    { name: "United Kingdom" },
+    { name: "United States" },
+    { name: "Canada" },
+    { name: "Japan" },
   ];
 
-  const handleCityChange = (event: any) => {
-    const cityName = event.target.value;
-    setSelectedCity(cityName);
-    const city = cities.find((c) => c.name === cityName);
-    if (city) {
-      setLatitude(city.lat.toString());
-      setLongitude(city.lng.toString());
-    }
+  const handleCountryChange = (event: any) => {
+    const countryName = event.target.value;
+    setSelectedCountry(countryName);
+    setCountryName(countryName);
   };
 
   const handleSubmit = async () => {
-    if (!scheduledTime || !latitude.trim() || !longitude.trim()) {
+    if (!scheduledTime || !countryName.trim()) {
       setError("Please fill in all required fields");
       return;
     }
@@ -68,13 +68,12 @@ export default function WeatherFetcher({ tenant }: WeatherFetcherProps) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          name: selectedCity ? `${selectedCity}` : `${latitude}, ${longitude}`,
+          name: countryName,
           scheduledDate: scheduledTime.toISOString(),
           tenantId: tenant,
-          type: "weather",
+          type: "countries",
           data: {
-            latitude: parseFloat(latitude),
-            longitude: parseFloat(longitude),
+            countryName,
           },
         }),
       });
@@ -88,9 +87,8 @@ export default function WeatherFetcher({ tenant }: WeatherFetcherProps) {
       setSuccess(`Job created successfully! ID: ${jobData.id}`);
 
       // Reset form
-      setLatitude("");
-      setLongitude("");
-      setSelectedCity("");
+      setCountryName("");
+      setSelectedCountry("");
       setScheduledTime(dayjs());
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
@@ -103,11 +101,11 @@ export default function WeatherFetcher({ tenant }: WeatherFetcherProps) {
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Paper sx={{ p: 3 }}>
         <Typography variant="h4" gutterBottom>
-          Fetch Weather Data for {capitalize(tenant)}
+          Fetch Country Data for {capitalize(tenant)}
         </Typography>
         <Typography variant="body1" sx={{ mb: 3 }}>
-          Select a city or enter latitude and longitude to fetch weather data,
-          also schedule the request to be executed at a later time.
+          Select a country or enter a country name to fetch country data, also
+          schedule the request to be executed at a later time.
         </Typography>
 
         {error && (
@@ -143,68 +141,38 @@ export default function WeatherFetcher({ tenant }: WeatherFetcherProps) {
           />
 
           <FormControl fullWidth>
-            <InputLabel>Select a City (Optional)</InputLabel>
+            <InputLabel>Select a Country (Optional)</InputLabel>
             <Select
-              value={selectedCity}
-              onChange={handleCityChange}
-              label="Select a City (Optional)"
+              value={selectedCountry}
+              onChange={handleCountryChange}
+              label="Select a Country (Optional)"
             >
               <MenuItem value="">
                 <em>None</em>
               </MenuItem>
-              {cities.map((city) => (
-                <MenuItem key={city.name} value={city.name}>
-                  {city.name}
+              {countries.map((country) => (
+                <MenuItem key={country.name} value={country.name}>
+                  {country.name}
                 </MenuItem>
               ))}
             </Select>
           </FormControl>
 
-          <Box sx={{ display: "flex", gap: 2 }}>
-            <TextField
-              label="Latitude"
-              type="number"
-              value={latitude}
-              onChange={(e) => setLatitude(e.target.value)}
-              variant="outlined"
-              fullWidth
-              required
-              slotProps={{
-                htmlInput: {
-                  step: "any",
-                  min: -90,
-                  max: 90,
-                },
-              }}
-            />
-            <TextField
-              label="Longitude"
-              type="number"
-              value={longitude}
-              onChange={(e) => setLongitude(e.target.value)}
-              variant="outlined"
-              fullWidth
-              required
-              slotProps={{
-                htmlInput: {
-                  step: "any",
-                  min: -180,
-                  max: 180,
-                },
-              }}
-            />
-          </Box>
+          <TextField
+            label="Country Name"
+            value={countryName}
+            onChange={(e) => setCountryName(e.target.value)}
+            variant="outlined"
+            fullWidth
+            required
+            placeholder="Enter country name in English"
+          />
 
           <Box sx={{ display: "flex", gap: 2 }}>
             <Button
               variant="contained"
               onClick={handleSubmit}
-              disabled={
-                !scheduledTime ||
-                !latitude.trim() ||
-                !longitude.trim() ||
-                isLoading
-              }
+              disabled={!scheduledTime || !countryName.trim() || isLoading}
               startIcon={isLoading ? <CircularProgress size={20} /> : null}
             >
               {isLoading ? "Creating Job..." : "Create Job"}
@@ -212,9 +180,8 @@ export default function WeatherFetcher({ tenant }: WeatherFetcherProps) {
             <Button
               variant="outlined"
               onClick={() => {
-                setLatitude("");
-                setLongitude("");
-                setSelectedCity("");
+                setCountryName("");
+                setSelectedCountry("");
                 setScheduledTime(dayjs());
                 setError(null);
                 setSuccess(null);
