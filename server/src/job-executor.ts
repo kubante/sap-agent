@@ -2,6 +2,7 @@ import { serviceRegistry } from "./services/service-registry";
 import { Job } from "./types";
 /**
  * Executes a job by validating data and fetching results using the appropriate service
+ * Mutates the job object !!
  * @param job - The job to execute
  */
 export async function executeJob(job: Job): Promise<void> {
