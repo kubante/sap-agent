@@ -227,7 +227,7 @@ export default function StatusPage() {
       </Box>
 
       {jobs.length === 0 ? (
-        <Paper sx={{ p: 4, textAlign: "center" }}>
+        <Box sx={{ p: 4, textAlign: "center" }}>
           <Typography variant="h5" gutterBottom>
             No jobs found
           </Typography>
@@ -244,7 +244,7 @@ export default function StatusPage() {
           >
             Create New Job
           </Button>
-        </Paper>
+        </Box>
       ) : (
         <TableContainer>
           <Table>
