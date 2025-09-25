@@ -73,7 +73,10 @@ app.post("/api/job", async (req, res) => {
     id: Date.now().toString(), // Simple ID generation
     name,
     createdDate: new Date(),
-    scheduledDate: new Date(scheduledDate),
+    scheduledDate:
+      new Date(scheduledDate) < new Date()
+        ? new Date()
+        : new Date(scheduledDate), // to avoid having the scheduled date in the past
     status: "scheduled",
     type,
     tenantId,
