@@ -1,3 +1,4 @@
+import { Box } from "@mui/material";
 import { useTenant } from "../../contexts/TenantContext";
 import InvalidTenant from "../../components/InvalidTenant";
 import WeatherFetcher from "./WeatherFetcher";
@@ -11,10 +12,16 @@ export default function RequestPage() {
   }
 
   return (
-    <>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        gap: "16px",
+        marginBottom: "16px",
+      }}
+    >
       <WeatherFetcher tenant={tenant} />
-      <br />
       <CountryFetcher tenant={tenant} />
-    </>
+    </Box>
   );
 }

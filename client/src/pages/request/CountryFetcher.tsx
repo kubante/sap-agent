@@ -6,10 +6,7 @@ import {
   TextField,
   Alert,
   CircularProgress,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
+  Autocomplete,
 } from "@mui/material";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -18,6 +15,7 @@ import { useState } from "react";
 import type { Dayjs } from "dayjs";
 import dayjs from "dayjs";
 import { capitalize } from "lodash";
+import { COUNTRIES } from "../../constants";
 
 interface CountryFetcherProps {
   tenant: string;
@@ -25,34 +23,13 @@ interface CountryFetcherProps {
 
 export default function CountryFetcher({ tenant }: CountryFetcherProps) {
   const [scheduledTime, setScheduledTime] = useState<Dayjs | null>(dayjs());
-  const [countryName, setCountryName] = useState("");
-  const [selectedCountry, setSelectedCountry] = useState("");
+  const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  // Country options
-  const countries = [
-    { name: "Germany" },
-    { name: "Italy" },
-    { name: "Serbia" },
-    { name: "Greece" },
-    { name: "France" },
-    { name: "Spain" },
-    { name: "United Kingdom" },
-    { name: "United States" },
-    { name: "Canada" },
-    { name: "Japan" },
-  ];
-
-  const handleCountryChange = (event: any) => {
-    const countryName = event.target.value;
-    setSelectedCountry(countryName);
-    setCountryName(countryName);
-  };
-
   const handleSubmit = async () => {
-    if (!scheduledTime || !countryName.trim()) {
+    if (!scheduledTime || !selectedCountry) {
       setError("Please fill in all required fields");
       return;
     }
@@ -68,12 +45,12 @@ export default function CountryFetcher({ tenant }: CountryFetcherProps) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          name: countryName,
+          name: selectedCountry,
           scheduledDate: scheduledTime.toISOString(),
           tenantId: tenant,
           type: "countries",
           data: {
-            countryName,
+            name: selectedCountry,
           },
         }),
       });
@@ -87,8 +64,7 @@ export default function CountryFetcher({ tenant }: CountryFetcherProps) {
       setSuccess(`Job created successfully! ID: ${jobData.id}`);
 
       // Reset form
-      setCountryName("");
-      setSelectedCountry("");
+      setSelectedCountry(null);
       setScheduledTime(dayjs());
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
@@ -140,39 +116,30 @@ export default function CountryFetcher({ tenant }: CountryFetcherProps) {
             }}
           />
 
-          <FormControl fullWidth>
-            <InputLabel>Select a Country (Optional)</InputLabel>
-            <Select
-              value={selectedCountry}
-              onChange={handleCountryChange}
-              label="Select a Country (Optional)"
-            >
-              <MenuItem value="">
-                <em>None</em>
-              </MenuItem>
-              {countries.map((country) => (
-                <MenuItem key={country.name} value={country.name}>
-                  {country.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          <TextField
-            label="Country Name"
-            value={countryName}
-            onChange={(e) => setCountryName(e.target.value)}
-            variant="outlined"
+          <Autocomplete
+            value={selectedCountry}
+            onChange={(_, newValue) => {
+              setSelectedCountry(newValue);
+            }}
+            options={COUNTRIES}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Select Country"
+                variant="outlined"
+                required
+                placeholder="Type to search countries..."
+              />
+            )}
+            freeSolo
             fullWidth
-            required
-            placeholder="Enter country name in English"
           />
 
           <Box sx={{ display: "flex", gap: 2 }}>
             <Button
               variant="contained"
               onClick={handleSubmit}
-              disabled={!scheduledTime || !countryName.trim() || isLoading}
+              disabled={!scheduledTime || !selectedCountry || isLoading}
               startIcon={isLoading ? <CircularProgress size={20} /> : null}
             >
               {isLoading ? "Creating Job..." : "Create Job"}
@@ -180,8 +147,7 @@ export default function CountryFetcher({ tenant }: CountryFetcherProps) {
             <Button
               variant="outlined"
               onClick={() => {
-                setCountryName("");
-                setSelectedCountry("");
+                setSelectedCountry(null);
                 setScheduledTime(dayjs());
                 setError(null);
                 setSuccess(null);
