@@ -1,4 +1,6 @@
 import axios from "axios";
+import { BERLIN_WEATHER_MOCK_DATA } from "../../mocks/weather-mock-data";
+import { checkInternetConnectivity } from "../../utils/connectivity";
 import {
   DataService,
   ValidationError,
@@ -10,7 +12,7 @@ export class WeatherDataService
   implements DataService<WeatherData, WeatherProcessedData>
 {
   /**
-   * Fetches weather data from the Open-Meteo API
+   * Fetches weather data from the Open-Meteo API or returns mock data if offline
    * @param processedData - The processed coordinates
    * @returns Promise<WeatherData | null> - Weather data or null if fetch fails
    */
@@ -18,13 +20,26 @@ export class WeatherDataService
     processedData: WeatherProcessedData
   ): Promise<WeatherData | null> {
     try {
+      // Check internet connectivity first
+      const hasInternet = await checkInternetConnectivity();
+
+      if (!hasInternet) {
+        console.log(
+          "No internet connectivity detected, returning mock weather data for Berlin"
+        );
+        return BERLIN_WEATHER_MOCK_DATA;
+      }
+
+      // Fetch live data from API
       const response = await axios.get(
         `https://api.open-meteo.com/v1/forecast?latitude=${processedData.latitude}&longitude=${processedData.longitude}&current=temperature_2m,wind_speed_10m&hourly=temperature_2m,relative_humidity_2m,wind_speed_10m`
       );
       return response.data;
     } catch (error) {
       console.error("Error fetching weather data:", error);
-      return null;
+      // If API call fails, return mock data as fallback
+      console.log("API call failed, returning mock weather data for Berlin");
+      return BERLIN_WEATHER_MOCK_DATA;
     }
   }
 

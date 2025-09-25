@@ -1,4 +1,6 @@
 import axios from "axios";
+import { GERMANY_COUNTRY_MOCK_DATA } from "../../mocks/country-mock-data";
+import { checkInternetConnectivity } from "../../utils/connectivity";
 import {
   DataService,
   ValidationError,
@@ -11,7 +13,7 @@ export class CountryDataService
   implements DataService<CountryData[], CountryProcessedData>
 {
   /**
-   * Fetches country data from the REST Countries API
+   * Fetches country data from the REST Countries API or returns mock data if offline
    * @param processedData - The processed country name
    * @returns Promise<CountryData[] | null> - Country data array or null if fetch fails
    */
@@ -19,6 +21,17 @@ export class CountryDataService
     processedData: CountryProcessedData
   ): Promise<CountryData[] | null> {
     try {
+      // Check internet connectivity first
+      const hasInternet = await checkInternetConnectivity();
+
+      if (!hasInternet) {
+        console.log(
+          "No internet connectivity detected, returning mock country data for Germany"
+        );
+        return GERMANY_COUNTRY_MOCK_DATA as unknown as CountryData[];
+      }
+
+      // Fetch live data from API
       const response = await axios.get(
         `https://restcountries.com/v3.1/name/${encodeURIComponent(
           processedData.countryName
@@ -27,7 +40,9 @@ export class CountryDataService
       return response.data;
     } catch (error) {
       console.error("Error fetching country data:", error);
-      return null;
+      // If API call fails, return mock data as fallback
+      console.log("API call failed, returning mock country data for Germany");
+      return GERMANY_COUNTRY_MOCK_DATA as unknown as CountryData[];
     }
   }
 
