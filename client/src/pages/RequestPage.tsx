@@ -170,10 +170,12 @@ export default function RequestPage() {
               variant="outlined"
               fullWidth
               required
-              inputProps={{
-                step: "any",
-                min: -90,
-                max: 90,
+              slotProps={{
+                htmlInput: {
+                  step: "any",
+                  min: -90,
+                  max: 90,
+                },
               }}
             />
             <TextField
@@ -184,10 +186,12 @@ export default function RequestPage() {
               variant="outlined"
               fullWidth
               required
-              inputProps={{
-                step: "any",
-                min: -180,
-                max: 180,
+              slotProps={{
+                htmlInput: {
+                  step: "any",
+                  min: -180,
+                  max: 180,
+                },
               }}
             />
           </Box>
