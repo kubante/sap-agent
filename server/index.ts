@@ -40,6 +40,50 @@ app.get("/api/jobs", (req, res) => {
   res.json(filteredJobs);
 });
 
+// Function to execute a job
+async function executeJob(job: Job): Promise<void> {
+  try {
+    console.log(`Executing job ${job.id} (${job.name})`);
+
+    // Update job status to indicate execution started
+    job.status = "scheduled"; // Keep as scheduled while executing
+
+    // Validate weather request data using the WeatherDataService
+    const validationResult = weatherService.validateAndProcessWeatherRequest(
+      job.data
+    );
+
+    if (!validationResult.isValid) {
+      console.error(
+        `Job ${job.id} validation failed:`,
+        validationResult.errors
+      );
+      job.status = "failed";
+      return;
+    }
+
+    const { latitude, longitude } = validationResult.coordinates!;
+
+    // Fetch weather data
+    console.log(
+      `Fetching weather data for job ${job.id} at coordinates: ${latitude}, ${longitude}`
+    );
+    const weatherData = await weatherService.fetchWeatherData(
+      latitude,
+      longitude
+    );
+
+    // Update job with weather data and mark as completed
+    job.data = weatherData?.current || undefined;
+    job.status = "completed";
+
+    console.log(`Job ${job.id} completed successfully`);
+  } catch (error) {
+    console.error(`Job ${job.id} execution failed:`, error);
+    job.status = "failed";
+  }
+}
+
 // POST /job - Create a new job
 app.post("/api/job", async (req, res) => {
   const { name, scheduledDate, type, tenantId, data } = req.body;
@@ -63,17 +107,6 @@ app.post("/api/job", async (req, res) => {
     });
   }
 
-  const { latitude, longitude } = validationResult.coordinates!;
-
-  // Fetch weather data
-  console.log(
-    `Fetching weather data for new job at coordinates: ${latitude}, ${longitude}`
-  );
-  const weatherData = await weatherService.fetchWeatherData(
-    latitude,
-    longitude
-  );
-
   // Create new job
   const newJob: Job = {
     id: Date.now().toString(), // Simple ID generation
@@ -83,10 +116,32 @@ app.post("/api/job", async (req, res) => {
     status: "scheduled",
     type,
     tenantId,
-    data: weatherData?.current || undefined,
+    data, // Store the original request data, not weather data yet
   };
 
   jobs.push(newJob);
+
+  // Check if the job should be executed immediately or scheduled
+  const now = new Date();
+  const scheduledTime = new Date(scheduledDate);
+
+  if (scheduledTime <= now) {
+    // Execute immediately if scheduled date is in the past
+    console.log(
+      `Job ${newJob.id} scheduled for past date, executing immediately`
+    );
+    executeJob(newJob);
+  } else {
+    // Schedule for future execution
+    const delayMs = scheduledTime.getTime() - now.getTime();
+    console.log(
+      `Job ${newJob.id} scheduled for future execution in ${delayMs}ms`
+    );
+
+    setTimeout(() => {
+      executeJob(newJob);
+    }, delayMs);
+  }
 
   res.status(201).json(newJob);
 });
