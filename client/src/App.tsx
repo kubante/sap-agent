@@ -11,8 +11,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { TENANTS, ROUTES } from "./constants.ts";
 import { TenantProvider } from "./contexts/TenantContext";
 import Navigation from "./components/Navigation";
-import RequestPage from "./pages/RequestPage";
-import StatusPage from "./pages/StatusPage";
+import RequestPage from "./pages/request/RequestPage.tsx";
+import StatusPage from "./pages/status/StatusPage.tsx";
 import InvalidTenant from "./components/InvalidTenant";
 import { theme } from "./theme";
 

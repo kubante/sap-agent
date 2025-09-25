@@ -12,7 +12,7 @@ export default function Navigation() {
     <AppBar position="static" elevation={0}>
       <Toolbar>
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-          Meteo Agent {currentTenant && `- ${capitalize(currentTenant)}`}
+          Travel Agent {currentTenant && `- ${capitalize(currentTenant)}`}
         </Typography>
         <Box sx={{ display: "flex", gap: 1 }}>
           <Button

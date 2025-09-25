@@ -19,8 +19,8 @@ import {
   IconButton,
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
-import { useTenant } from "../contexts/TenantContext";
-import InvalidTenant from "../components/InvalidTenant";
+import { useTenant } from "../../contexts/TenantContext";
+import InvalidTenant from "../../components/InvalidTenant";
 import { useState } from "react";
 
 interface Job {

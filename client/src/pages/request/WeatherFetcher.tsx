@@ -15,13 +15,14 @@ import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { useState } from "react";
-import { useTenant } from "../contexts/TenantContext";
-import InvalidTenant from "../components/InvalidTenant";
 import type { Dayjs } from "dayjs";
 import dayjs from "dayjs";
 
-export default function RequestPage() {
-  const { tenant } = useTenant();
+interface WeatherFetcherProps {
+  tenant: string;
+}
+
+export default function WeatherFetcher({ tenant }: WeatherFetcherProps) {
   const [scheduledTime, setScheduledTime] = useState<Dayjs | null>(dayjs());
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
@@ -97,18 +98,15 @@ export default function RequestPage() {
     }
   };
 
-  if (!tenant) {
-    return <InvalidTenant />;
-  }
-
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Paper sx={{ p: 3 }}>
         <Typography variant="h4" gutterBottom>
-          Create Job for {tenant}
+          Fetch Weather Data for {tenant}
         </Typography>
         <Typography variant="body1" sx={{ mb: 3 }}>
-          Fill in the details to create a new job with weather data
+          Select a city or enter latitude and longitude to fetch weather data,
+          also schedule the request to be executed at a later time.
         </Typography>
 
         {error && (
