@@ -1,4 +1,9 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import { Container } from "@mui/material";
@@ -58,6 +63,15 @@ function App() {
                       key={`${tenant}-status`}
                       path={`/${tenant}/${ROUTES.STATUS}`}
                       element={<StatusPage />}
+                    />
+                  ))}
+                  {TENANTS.map((tenant) => (
+                    <Route
+                      key={`${tenant}-redirect`}
+                      path={`/${tenant}`}
+                      element={
+                        <Navigate to={`/${tenant}/${ROUTES.REQUEST}`} replace />
+                      }
                     />
                   ))}
                   <Route path="*" element={<InvalidTenant />} />
