@@ -1,5 +1,5 @@
 import express from "express";
-import { WeatherDataService } from "./WeatherData.ts";
+import { WeatherDataService } from "./services/weather/weather-service.ts";
 
 // Define the Job interface
 interface Job {
