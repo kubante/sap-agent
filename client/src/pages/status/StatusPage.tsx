@@ -21,7 +21,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { useTenant } from "../../contexts/TenantContext";
 import InvalidTenant from "../../components/InvalidTenant";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface Job {
   id: string;
@@ -38,6 +38,16 @@ export default function StatusPage() {
   const { tenant } = useTenant();
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  // Update clock every second
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
 
   // React Query hook with automatic polling
   const {
@@ -162,6 +172,21 @@ export default function StatusPage() {
           </Typography>
           <Typography variant="body1">
             View the status of your requests for tenant: {tenant}
+          </Typography>
+        </Box>
+        <Box
+          sx={{
+            textAlign: "right",
+            padding: 2,
+            borderRadius: 2,
+            minWidth: "200px",
+          }}
+        >
+          <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+            {currentTime.toLocaleDateString()}
+          </Typography>
+          <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+            {currentTime.toLocaleTimeString()}
           </Typography>
         </Box>
       </Box>
