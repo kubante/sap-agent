@@ -58,7 +58,6 @@ export default function StatusPage() {
     refetchInterval: 5000, // Poll every 5 seconds
     refetchIntervalInBackground: true, // Continue polling when tab is not focused
     enabled: !!tenant, // Only run when tenant exists
-    staleTime: 0, // Always consider data stale to ensure fresh polling
   });
 
   const getStatusColor = (status: Job["status"]) => {
