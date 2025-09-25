@@ -17,11 +17,14 @@ import {
   DialogActions,
   Box,
   IconButton,
+  ButtonGroup,
 } from "@mui/material";
+import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useTenant } from "../../contexts/TenantContext";
 import InvalidTenant from "../../components/InvalidTenant";
 import { useState, useEffect } from "react";
+import { ROUTES } from "../../constants";
 
 interface Job {
   id: string;
@@ -39,6 +42,9 @@ export default function StatusPage() {
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [selectedFilter, setSelectedFilter] = useState<
+    "all" | "weather" | "countries"
+  >("all");
 
   // Update clock every second
   useEffect(() => {
@@ -55,11 +61,17 @@ export default function StatusPage() {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["jobs", tenant],
+    queryKey: ["jobs", tenant, selectedFilter],
     queryFn: async () => {
       if (!tenant) throw new Error("No tenant selected");
 
-      const response = await fetch(`/api/jobs?tenantId=${tenant}`);
+      const url = new URL("/api/jobs", window.location.origin);
+      url.searchParams.set("tenantId", tenant);
+      if (selectedFilter !== "all") {
+        url.searchParams.set("type", selectedFilter);
+      }
+
+      const response = await fetch(url.toString());
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -191,52 +203,96 @@ export default function StatusPage() {
         </Box>
       </Box>
 
-      <TableContainer>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>ID</TableCell>
-              <TableCell>Type</TableCell>
-              <TableCell>Name</TableCell>
-              <TableCell>Status</TableCell>
-              <TableCell>Created</TableCell>
-              <TableCell>Scheduled</TableCell>
-              <TableCell>Details</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {jobs.map((job: Job) => (
-              <TableRow key={job.id}>
-                <TableCell>{job.id}</TableCell>
-                <TableCell>{job.type}</TableCell>
-                <TableCell>{job.name}</TableCell>
-                <TableCell>
-                  <Chip
-                    label={job.status}
-                    color={getStatusColor(job.status) as any}
-                    size="small"
-                  />
-                </TableCell>
-                <TableCell>
-                  {new Date(job.createdDate).toLocaleString()}
-                </TableCell>
-                <TableCell>
-                  {new Date(job.scheduledDate).toLocaleString()}
-                </TableCell>
-                <TableCell>
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    onClick={() => handleDetailsClick(job)}
-                  >
-                    Details
-                  </Button>
-                </TableCell>
+      <Box sx={{ mb: 3 }}>
+        <ButtonGroup variant="outlined" aria-label="job type filter">
+          <Button
+            variant={selectedFilter === "all" ? "contained" : "outlined"}
+            onClick={() => setSelectedFilter("all")}
+          >
+            All
+          </Button>
+          <Button
+            variant={selectedFilter === "countries" ? "contained" : "outlined"}
+            onClick={() => setSelectedFilter("countries")}
+          >
+            Countries
+          </Button>
+          <Button
+            variant={selectedFilter === "weather" ? "contained" : "outlined"}
+            onClick={() => setSelectedFilter("weather")}
+          >
+            Weather
+          </Button>
+        </ButtonGroup>
+      </Box>
+
+      {jobs.length === 0 ? (
+        <Paper sx={{ p: 4, textAlign: "center" }}>
+          <Typography variant="h5" gutterBottom>
+            No jobs found
+          </Typography>
+          <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+            {selectedFilter === "all"
+              ? "You haven't created any jobs yet. Create your first job to get started!"
+              : `No ${selectedFilter} jobs found. Try creating a ${selectedFilter} job or switch to "All" to see all jobs.`}
+          </Typography>
+          <Button
+            component={Link}
+            to={`/${tenant}/${ROUTES.REQUEST}`}
+            variant="contained"
+            size="large"
+          >
+            Create New Job
+          </Button>
+        </Paper>
+      ) : (
+        <TableContainer>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>ID</TableCell>
+                <TableCell>Type</TableCell>
+                <TableCell>Name</TableCell>
+                <TableCell>Status</TableCell>
+                <TableCell>Created</TableCell>
+                <TableCell>Scheduled</TableCell>
+                <TableCell>Details</TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            </TableHead>
+            <TableBody>
+              {jobs.map((job: Job) => (
+                <TableRow key={job.id}>
+                  <TableCell>{job.id}</TableCell>
+                  <TableCell>{job.type}</TableCell>
+                  <TableCell>{job.name}</TableCell>
+                  <TableCell>
+                    <Chip
+                      label={job.status}
+                      color={getStatusColor(job.status) as any}
+                      size="small"
+                    />
+                  </TableCell>
+                  <TableCell>
+                    {new Date(job.createdDate).toLocaleString()}
+                  </TableCell>
+                  <TableCell>
+                    {new Date(job.scheduledDate).toLocaleString()}
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      onClick={() => handleDetailsClick(job)}
+                    >
+                      Details
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
 
       {/* Details Dialog */}
       <Dialog
