@@ -15,6 +15,7 @@ This travel agent application provides:
 ## 🛠️ Technologies Used
 
 ### Frontend
+
 - **React 19** with TypeScript
 - **Material-UI (MUI)** for modern, responsive UI components
 - **React Router** for client-side routing
@@ -23,12 +24,14 @@ This travel agent application provides:
 - **Vitest** for testing with React Testing Library
 
 ### Backend
+
 - **Node.js** with Express.js
 - **TypeScript** for type safety
 - **Axios** for HTTP requests to external APIs
 - **Jest** for comprehensive testing
 
 ### Testing
+
 - **Client**: Vitest + React Testing Library + JSDOM (36 tests)
 - **Server**: Jest + TypeScript (91 tests total)
 - **Coverage**: Both client and server have comprehensive test coverage
@@ -36,10 +39,12 @@ This travel agent application provides:
 ## 🚀 How to Serve the Apps
 
 ### Prerequisites
+
 - Node.js (v18 or higher)
 - npm or yarn
 
 ### Client Setup
+
 ```bash
 cd client
 npm install
@@ -48,6 +53,7 @@ npm run dev
 The client will be available at `http://localhost:5173`
 
 ### Server Setup
+
 ```bash
 cd server
 npm install
@@ -56,6 +62,7 @@ npm run dev
 The server will be available at `http://localhost:3000`
 
 ### Production Build
+
 ```bash
 # Client
 cd client
@@ -70,6 +77,7 @@ npm start
 ## 🧪 How to Test
 
 ### Client Testing
+
 Refer to [client/TESTING.md](client/TESTING.md) for detailed testing instructions:
 
 ```bash
@@ -82,6 +90,7 @@ npm run test:coverage      # Run tests with coverage
 **Test Coverage**: 36 tests covering components, API integration, form validation, and user interactions.
 
 ### Server Testing
+
 Refer to [server/TESTING.md](server/TESTING.md) for detailed testing instructions:
 
 ```bash
@@ -98,19 +107,23 @@ npm run test:coverage     # Run tests with coverage
 The server acts as an intelligent agent that:
 
 ### Job Management
+
 - **Tracks Two Job Types**: Weather and Country data fetching
 - **Supports Three Tenants**: filip, abdullah, and jacob (hardcoded in frontend via URL paths)
 - **Agnostic Execution**: Uses a service registry to automatically route jobs to appropriate services
 - **Real-time Updates**: Frontend polls for job status updates
 
 ### Service Registry Pattern
+
 The agent uses a service registry pattern where:
+
 - Each service implements a common `DataService` interface
 - Services are registered by type (weather, countries)
 - The `executeJob` function is completely agnostic and automatically selects the right service
 - New services can be added without modifying existing code
 
 ### API Endpoints
+
 - `POST /api/job` - Create new jobs
 - `GET /api/jobs/:tenantId` - Get jobs for a specific tenant
 - `GET /api/jobs/:tenantId/:type` - Get jobs filtered by type
@@ -120,6 +133,7 @@ The agent uses a service registry pattern where:
 The agent can work with any frontend that respects the POST endpoints model:
 
 ### Required API Contract
+
 ```typescript
 // Job creation
 POST /api/job
@@ -137,7 +151,8 @@ GET /api/jobs/:tenantId/:type
 ```
 
 ### Real-time Updates
-The frontend polls the server for job status updates, making it compatible with any HTTP client.
+
+The frontend polls the server every 5s for job status updates.
 
 ## 🔧 Adding New Services
 
@@ -148,6 +163,7 @@ To add new services, follow the instructions in [server/test-agnostic-system.md]
 3. **No Code Changes**: The `executeJob` function automatically handles new services
 
 ### Example Service Structure
+
 ```typescript
 class NewDataService implements DataService {
   validate(data: any): ValidationResult { /* validation logic */ }
@@ -158,25 +174,30 @@ class NewDataService implements DataService {
 ## 📋 Assumptions & Design Decisions
 
 ### Multi-tenancy
+
 - **URL-based Tenants**: Uses URL paths (`/filip`, `/abdullah`, `/jacob`) instead of subdomains or authentication
 - **Simplified for Demo**: Chosen for coding challenge simplicity over production-ready authentication
 
 ### Persistence
+
 - **In-Memory Storage**: Jobs are stored in memory and deleted when server restarts
 - **No Database**: Chosen for simplicity and demo purposes
 - **Stateless Design**: Each server restart starts with a clean slate
 
 ### Offline Usage
+
 - **Connectivity Utility**: Checks internet connection before making external API calls
 - **Mock Data Fallback**: Returns mock data when offline or when external services fail
 - **Graceful Degradation**: Application remains functional even without internet
 
 ### API Keys
+
 - **No Environment Variables**: Both weather and country APIs work without API keys
 - **Public APIs**: Uses free, public APIs that don't require authentication
 - **Zero Configuration**: No `.env` file needed for basic functionality
 
 ### Messaging Protocol
+
 - **HTTP Polling**: Frontend polls server for real-time updates
 - **Simple Implementation**: Chosen over WebSockets for simplicity
 - **Stateless Communication**: Each request is independent
@@ -215,10 +236,3 @@ sap-agent/
 - [Server Testing Guide](server/TESTING.md) - Testing instructions for the backend
 - [Agnostic System Guide](server/test-agnostic-system.md) - How to add new services to the agent
 
-## 🤝 Contributing
-
-When adding new features:
-1. Follow the existing service registry pattern
-2. Add comprehensive tests
-3. Update documentation
-4. Ensure offline functionality is maintained
