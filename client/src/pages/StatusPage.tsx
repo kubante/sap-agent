@@ -18,10 +18,10 @@ import {
   Box,
   IconButton,
 } from "@mui/material";
-import { Close as CloseIcon } from "@mui/icons-material";
+import { useQuery } from "@tanstack/react-query";
 import { useTenant } from "../contexts/TenantContext";
 import InvalidTenant from "../components/InvalidTenant";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 interface Job {
   id: string;
@@ -36,38 +36,30 @@ interface Job {
 
 export default function StatusPage() {
   const { tenant } = useTenant();
-  const [jobs, setJobs] = useState<Job[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  // Fetch jobs from API
-  useEffect(() => {
-    const fetchJobs = async () => {
-      if (!tenant) return;
+  // React Query hook with automatic polling
+  const {
+    data: jobs = [],
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["jobs", tenant],
+    queryFn: async () => {
+      if (!tenant) throw new Error("No tenant selected");
 
-      try {
-        setLoading(true);
-        setError(null);
-        const response = await fetch(`/api/jobs?tenantId=${tenant}`);
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        setJobs(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to fetch jobs");
-        console.error("Error fetching jobs:", err);
-      } finally {
-        setLoading(false);
+      const response = await fetch(`/api/jobs?tenantId=${tenant}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-    };
-
-    fetchJobs();
-  }, [tenant]);
+      return response.json();
+    },
+    refetchInterval: 5000, // Poll every 5 seconds
+    refetchIntervalInBackground: true, // Continue polling when tab is not focused
+    enabled: !!tenant, // Only run when tenant exists
+    staleTime: 0, // Always consider data stale to ensure fresh polling
+  });
 
   const getStatusColor = (status: Job["status"]) => {
     switch (status) {
@@ -136,7 +128,7 @@ export default function StatusPage() {
     return <InvalidTenant />;
   }
 
-  if (loading) {
+  if (isLoading) {
     return (
       <Paper sx={{ p: 3, textAlign: "center" }}>
         <CircularProgress />
@@ -150,19 +142,30 @@ export default function StatusPage() {
   if (error) {
     return (
       <Paper sx={{ p: 3 }}>
-        <Alert severity="error">Error loading jobs: {error}</Alert>
+        <Alert severity="error">Error loading jobs: {error.message}</Alert>
       </Paper>
     );
   }
 
   return (
     <Paper sx={{ p: 3 }}>
-      <Typography variant="h4" gutterBottom>
-        Status Page for {tenant}
-      </Typography>
-      <Typography variant="body1" sx={{ mb: 3 }}>
-        View the status of your requests for tenant: {tenant}
-      </Typography>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 3,
+        }}
+      >
+        <Box>
+          <Typography variant="h4" gutterBottom>
+            Status Page for {tenant}
+          </Typography>
+          <Typography variant="body1">
+            View the status of your requests for tenant: {tenant}
+          </Typography>
+        </Box>
+      </Box>
 
       <TableContainer>
         <Table>
@@ -173,12 +176,12 @@ export default function StatusPage() {
               <TableCell>Name</TableCell>
               <TableCell>Status</TableCell>
               <TableCell>Created</TableCell>
-              <TableCell>Executed</TableCell>
+              <TableCell>Scheduled</TableCell>
               <TableCell>Details</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {jobs.map((job) => (
+            {jobs.map((job: Job) => (
               <TableRow key={job.id}>
                 <TableCell>{job.id}</TableCell>
                 <TableCell>{job.type}</TableCell>
@@ -229,7 +232,7 @@ export default function StatusPage() {
               top: 8,
             }}
           >
-            <CloseIcon />
+            ✕
           </IconButton>
         </DialogTitle>
         <DialogContent>
