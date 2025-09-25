@@ -111,7 +111,7 @@ export default function WeatherFetcher({ tenant }: WeatherFetcherProps) {
         </Typography>
 
         {error && (
-          <Alert severity="error" sx={{ mb: 2 }}>
+          <Alert data-testid="error-message" severity="error" sx={{ mb: 2 }}>
             {error}
           </Alert>
         )}

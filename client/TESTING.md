@@ -46,12 +46,17 @@ src/
 
 The client has comprehensive test coverage including:
 
-### Component Tests (5 tests)
-- ✅ **InvalidTenant Component** - Error state rendering
-- ✅ **Navigation Component** - Navigation bar and buttons
+### Component Tests (36 tests)
+- ✅ **InvalidTenant Component** (3 tests) - Error state rendering
+- ✅ **Navigation Component** (2 tests) - Navigation bar and buttons
+- ✅ **CountryFetcher Component** (12 tests) - Form validation, API calls, user interactions
+- ✅ **WeatherFetcher Component** (13 tests) - Coordinate validation, city selection, API calls
 - ✅ **Material-UI Integration** - Component rendering with MUI
 - ✅ **React Router Integration** - Navigation links and routing
 - ✅ **Context Integration** - Tenant context usage
+- ✅ **Form Validation** - Button states, input validation
+- ✅ **API Integration** - Request/response handling, error states
+- ✅ **User Interactions** - Form submissions, loading states
 
 ## Available Test Commands
 

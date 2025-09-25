@@ -85,7 +85,7 @@ export default function CountryFetcher({ tenant }: CountryFetcherProps) {
         </Typography>
 
         {error && (
-          <Alert severity="error" sx={{ mb: 2 }}>
+          <Alert data-testid="error-message" severity="error" sx={{ mb: 2 }}>
             {error}
           </Alert>
         )}
