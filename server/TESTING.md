@@ -5,6 +5,7 @@ This project uses **Jest** as the testing framework for validating the service f
 ## Setup
 
 The testing framework is already configured with:
+
 - Jest with TypeScript support
 - Coverage reporting
 - ES module support
@@ -28,6 +29,8 @@ Tests are organized in `__tests__` directories alongside the source files:
 
 ```
 src/
+├── __tests__/
+│   └── server.test.ts
 ├── services/
 │   ├── weather/
 │   │   ├── __tests__/
@@ -37,23 +40,44 @@ src/
 │       ├── __tests__/
 │       │   └── country-service.test.ts
 │       └── country-service.ts
+└── utils/
+    ├── __tests__/
+    │   └── connectivity.test.ts
+    └── connectivity.ts
 ```
 
 ## Test Coverage
 
-The validation functions have comprehensive test coverage including:
+The application has comprehensive test coverage including:
 
-### WeatherDataService Tests
+### Server API Tests (23 tests)
+- ✅ Job retrieval endpoint (filtering by tenantId and type)
+- ✅ Job creation endpoint (validation, error handling)
+- ✅ Service registry integration
+- ✅ Date handling and scheduling logic
+- ✅ Error handling and validation
+- ✅ Mock service testing
+
+### WeatherDataService Tests (25 tests)
 - ✅ Valid coordinate validation (various formats, boundary values)
 - ✅ Invalid data rejection (missing fields, wrong types, out-of-range values)
 - ✅ Edge cases (null, undefined, empty strings)
 - ✅ Multiple validation errors
 
-### CountryDataService Tests
+### CountryDataService Tests (23 tests)
 - ✅ Valid country name validation (case insensitive, whitespace handling)
 - ✅ Invalid data rejection (missing fields, wrong types, invalid countries)
 - ✅ Edge cases (null, undefined, empty strings, special characters)
 - ✅ Case sensitivity testing
+
+### Connectivity Utility Tests (20 tests)
+- ✅ Successful internet connectivity detection
+- ✅ Network failure scenarios (timeout, connection refused, DNS errors)
+- ✅ HTTP error handling (404, 500, etc.)
+- ✅ Error logging and console output
+- ✅ Concurrent and rapid successive calls
+- ✅ Edge cases (non-Error objects, null/undefined errors)
+- ✅ Network simulation scenarios
 
 ## Test Commands
 
