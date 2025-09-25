@@ -89,10 +89,10 @@ app.post("/api/job", async (req, res) => {
   const { name, scheduledDate, type, tenantId, data } = req.body;
 
   // Validate required fields
-  if (!name || !scheduledDate || !tenantId || !data) {
+  if (!name || !scheduledDate || !tenantId || !data || !type) {
     return res.status(400).json({
       error:
-        "Missing required fields: name, scheduledDate, tenantId and data are required",
+        "Missing required fields: name, scheduledDate, tenantId, type and data are required",
     });
   }
 
