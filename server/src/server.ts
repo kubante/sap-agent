@@ -12,9 +12,9 @@ const PORT = process.env.PORT || 3000;
 // Middleware for handling json
 app.use(express.json());
 
-// GET /jobs - Retrieve jobs filtered by tenantId
+// GET /jobs - Retrieve jobs filtered by tenantId and optionally by type
 app.get("/api/jobs", (req, res) => {
-  const { tenantId } = req.query;
+  const { tenantId, type } = req.query;
 
   if (!tenantId) {
     return res.status(400).json({
@@ -23,7 +23,16 @@ app.get("/api/jobs", (req, res) => {
   }
 
   // Filter jobs by tenantId
-  const filteredJobs = jobs.filter((job) => job.tenantId === tenantId);
+  let filteredJobs = jobs.filter((job) => job.tenantId === tenantId);
+
+  // If type is provided, filter by type as well
+  if (type) {
+    const typeStr = Array.isArray(type) ? type[0] : type;
+    if (typeStr === "weather" || typeStr === "countries") {
+      filteredJobs = filteredJobs.filter((job) => job.type === typeStr);
+    }
+  }
+
   res.json(filteredJobs);
 });
 
