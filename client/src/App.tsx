@@ -65,15 +65,21 @@ function App() {
                       element={<StatusPage />}
                     />
                   ))}
-                  {TENANTS.map((tenant) => (
-                    <Route
-                      key={`${tenant}-redirect`}
-                      path={`/${tenant}`}
-                      element={
-                        <Navigate to={`/${tenant}/${ROUTES.REQUEST}`} replace />
-                      }
-                    />
-                  ))}
+                  {
+                    // Redirect to request page if no path is provided
+                    TENANTS.map((tenant) => (
+                      <Route
+                        key={`${tenant}-redirect`}
+                        path={`/${tenant}`}
+                        element={
+                          <Navigate
+                            to={`/${tenant}/${ROUTES.REQUEST}`}
+                            replace
+                          />
+                        }
+                      />
+                    ))
+                  }
                   <Route path="*" element={<InvalidTenant />} />
                 </Routes>
               </Container>
