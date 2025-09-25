@@ -50,7 +50,7 @@ export default function CountryFetcher({ tenant }: CountryFetcherProps) {
           tenantId: tenant,
           type: "countries",
           data: {
-            name: selectedCountry,
+            countryName: selectedCountry,
           },
         }),
       });
