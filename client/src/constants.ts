@@ -207,7 +207,3 @@ export const COUNTRIES = [
   "Zambia",
   "Zimbabwe",
 ] as const;
-
-export type Tenant = (typeof TENANTS)[number];
-export type CountryName = (typeof COUNTRIES)[number];
-export type JobType = (typeof JOB_TYPES)[keyof typeof JOB_TYPES];

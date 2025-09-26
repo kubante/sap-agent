@@ -24,7 +24,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useTenant } from "../../contexts/TenantContext";
 import InvalidTenant from "../../components/InvalidTenant";
 import { useState, useEffect } from "react";
-import { ROUTES, JOB_TYPES, type JobType } from "../../constants";
+import { ROUTES, JOB_TYPES } from "../../constants";
+import type { JobType } from "../../types";
 
 interface Job {
   id: string;

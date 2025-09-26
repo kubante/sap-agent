@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { type Tenant, TENANTS } from "../constants";
+import { TENANTS } from "../constants";
+import type { Tenant } from "../types";
 
 interface TenantContextType {
   tenant: Tenant | null;
