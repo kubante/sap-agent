@@ -40,6 +40,23 @@ This travel agent application provides:
 - **Server**: Jest + TypeScript (91 tests total)
 - **Coverage**: Both client and server have comprehensive test coverage
 
+
+## 🚀 Getting Started
+
+1. Clone the repository
+2. Install dependencies for both client and server
+3. **Set up environment files:**
+
+   ```bash
+   # Copy environment templates
+   cp server/.env.example server/.env
+   cp client/.env.example client/.env
+   ```
+
+4. Start both applications (described in next section)
+5. Visit `http://localhost:5173` to access the application
+6. Navigate to different tenant paths to see multi-tenant functionality
+
 ## 🚀 How to Serve the Apps
 
 ### Prerequisites
@@ -65,19 +82,6 @@ npm run dev
 ```
 The server will be available at `http://localhost:3000`
 
-### Production Build
-
-```bash
-# Client
-cd client
-npm run build
-npm run preview
-
-# Server
-cd server
-npm start
-```
-
 ## 🧪 How to Test
 
 ### Client Testing
@@ -91,7 +95,6 @@ npm run test:run           # Run tests once
 npm run test:coverage      # Run tests with coverage
 ```
 
-**Test Coverage**: 36 tests covering components, API integration, form validation, and user interactions.
 
 ### Server Testing
 
@@ -104,7 +107,6 @@ npm run test:watch        # Run tests in watch mode
 npm run test:coverage     # Run tests with coverage
 ```
 
-**Test Coverage**: 91 tests covering API endpoints, service validation, connectivity utilities, and error handling.
 
 ## 🤖 Agent Architecture
 
@@ -156,7 +158,7 @@ GET /api/jobs/:tenantId/:type
 
 ### Real-time Updates
 
-The frontend polls the server every 5s for job status updates.
+The frontend polls the server every 5s for job status updates (can be configured via env file).
 
 ## 🔧 Adding New Services
 
@@ -166,21 +168,13 @@ To add new services:
 2. **Register Service**: Add to the service registry
 3. **No Code Changes**: The `executeJob` function automatically handles new services
 
-### Example Service Structure
-
-```typescript
-class NewDataService implements DataService {
-  validate(data: any): ValidationResult { /* validation logic */ }
-  fetchData(data: any): Promise<any> { /* data fetching logic */ }
-}
-```
 
 ## 📋 Assumptions & Design Decisions
 
 ### Multi-tenancy
 
 - **URL-based Tenants**: Uses URL paths (`/filip`, `/abdullah`, `/jacob`) instead of subdomains or authentication
-- **Simplified for Demo**: Chosen for coding challenge simplicity over production-ready authentication
+- **Simplified for Demo**: Chosen for coding challenge simplicity over production-ready authentication or subdomains.
 
 ### Persistence
 
@@ -225,22 +219,6 @@ sap-agent/
 │   └── TESTING.md          # Server testing guide
 └── README.md              # This file
 ```
-
-## 🚀 Getting Started
-
-1. Clone the repository
-2. Install dependencies for both client and server
-3. **Set up environment files:**
-
-   ```bash
-   # Copy environment templates
-   cp server/.env.example server/.env
-   cp client/.env.example client/.env
-   ```
-
-4. Start both applications
-5. Visit `http://localhost:5173` to access the application
-6. Navigate to different tenant paths to see multi-tenant functionality
 
 ## 📚 Additional Documentation
 

@@ -11,8 +11,6 @@ const jobs: Job[] = [];
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const API_TIMEOUT = parseInt(process.env.API_TIMEOUT || "5000");
-const POLLING_INTERVAL = parseInt(process.env.POLLING_INTERVAL || "5000");
 
 // Middleware for handling json
 app.use(express.json());

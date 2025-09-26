@@ -77,7 +77,7 @@ export default function StatusPage() {
       }
       return response.json();
     },
-    refetchInterval: import.meta.env.VITE_POLLING_INTERVAL || 5000, // Poll every 5 seconds
+    refetchInterval: Number(import.meta.env.VITE_POLLING_INTERVAL) || 2000,
     refetchIntervalInBackground: true, // Continue polling when tab is not focused
     enabled: !!tenant, // Only run when tenant exists
   });
