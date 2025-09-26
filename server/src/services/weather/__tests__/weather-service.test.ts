@@ -1,10 +1,24 @@
+import axios from "axios";
+import { BERLIN_WEATHER_MOCK_DATA } from "../../../mocks/weather-mock-data";
+import { checkInternetConnectivity } from "../../../utils/connectivity";
 import { WeatherDataService } from "../weather-service";
+
+// Mock dependencies
+jest.mock("axios");
+jest.mock("../../../utils/connectivity");
+
+const mockedAxios = axios as jest.Mocked<typeof axios>;
+const mockedCheckInternetConnectivity =
+  checkInternetConnectivity as jest.MockedFunction<
+    typeof checkInternetConnectivity
+  >;
 
 describe("WeatherDataService", () => {
   let weatherService: WeatherDataService;
 
   beforeEach(() => {
     weatherService = new WeatherDataService();
+    jest.clearAllMocks();
   });
 
   describe("validate", () => {
@@ -372,6 +386,272 @@ describe("WeatherDataService", () => {
           field: "longitude",
           message: "Longitude must be a valid number",
         });
+      });
+    });
+  });
+
+  describe("fetchData", () => {
+    const mockWeatherData = {
+      latitude: 52.52,
+      longitude: 13.405,
+      current: {
+        time: "2024-01-15T10:00",
+        temperature_2m: 2.1,
+        wind_speed_10m: 12.2,
+      },
+      current_units: {
+        temperature_2m: "°C",
+        wind_speed_10m: "km/h",
+      },
+    };
+
+    describe("when internet is available", () => {
+      beforeEach(() => {
+        mockedCheckInternetConnectivity.mockResolvedValue(true);
+      });
+
+      it("should fetch live data from Open-Meteo API", async () => {
+        mockedAxios.get.mockResolvedValueOnce({
+          data: mockWeatherData,
+        });
+
+        const processedData = { latitude: 52.52, longitude: 13.405 };
+        const result = await weatherService.fetchData(processedData);
+
+        expect(mockedCheckInternetConnectivity).toHaveBeenCalledTimes(1);
+        expect(mockedAxios.get).toHaveBeenCalledWith(
+          "https://api.open-meteo.com/v1/forecast?latitude=52.52&longitude=13.405&current=temperature_2m,wind_speed_10m"
+        );
+        expect(result).toEqual(mockWeatherData);
+      });
+
+      it("should handle different coordinate values", async () => {
+        mockedAxios.get.mockResolvedValueOnce({
+          data: mockWeatherData,
+        });
+
+        const processedData = { latitude: -33.9249, longitude: 18.4241 };
+        await weatherService.fetchData(processedData);
+
+        expect(mockedAxios.get).toHaveBeenCalledWith(
+          "https://api.open-meteo.com/v1/forecast?latitude=-33.9249&longitude=18.4241&current=temperature_2m,wind_speed_10m"
+        );
+      });
+
+      it("should handle boundary coordinate values", async () => {
+        mockedAxios.get.mockResolvedValueOnce({
+          data: mockWeatherData,
+        });
+
+        const processedData = { latitude: 90, longitude: 180 };
+        await weatherService.fetchData(processedData);
+
+        expect(mockedAxios.get).toHaveBeenCalledWith(
+          "https://api.open-meteo.com/v1/forecast?latitude=90&longitude=180&current=temperature_2m,wind_speed_10m"
+        );
+      });
+
+      it("should handle negative boundary coordinates", async () => {
+        mockedAxios.get.mockResolvedValueOnce({
+          data: mockWeatherData,
+        });
+
+        const processedData = { latitude: -90, longitude: -180 };
+        await weatherService.fetchData(processedData);
+
+        expect(mockedAxios.get).toHaveBeenCalledWith(
+          "https://api.open-meteo.com/v1/forecast?latitude=-90&longitude=-180&current=temperature_2m,wind_speed_10m"
+        );
+      });
+
+      it("should return mock data when API call fails", async () => {
+        const consoleErrorSpy = jest
+          .spyOn(console, "error")
+          .mockImplementation();
+        const consoleLogSpy = jest.spyOn(console, "log").mockImplementation();
+        mockedAxios.get.mockRejectedValueOnce(new Error("Network error"));
+
+        const processedData = { latitude: 52.52, longitude: 13.405 };
+        const result = await weatherService.fetchData(processedData);
+
+        expect(consoleErrorSpy).toHaveBeenCalledWith(
+          "Error fetching weather data:",
+          expect.any(Error)
+        );
+        expect(consoleLogSpy).toHaveBeenCalledWith(
+          "API call failed, returning mock weather data for Berlin"
+        );
+        expect(result).toEqual(BERLIN_WEATHER_MOCK_DATA);
+        consoleErrorSpy.mockRestore();
+        consoleLogSpy.mockRestore();
+      });
+
+      it("should handle API timeout", async () => {
+        const consoleSpy = jest.spyOn(console, "log").mockImplementation();
+        mockedAxios.get.mockRejectedValueOnce(new Error("timeout"));
+
+        const processedData = { latitude: 52.52, longitude: 13.405 };
+        const result = await weatherService.fetchData(processedData);
+
+        expect(result).toEqual(BERLIN_WEATHER_MOCK_DATA);
+        consoleSpy.mockRestore();
+      });
+
+      it("should handle API returning 404", async () => {
+        const consoleSpy = jest.spyOn(console, "log").mockImplementation();
+        mockedAxios.get.mockRejectedValueOnce(new Error("404 Not Found"));
+
+        const processedData = { latitude: 52.52, longitude: 13.405 };
+        const result = await weatherService.fetchData(processedData);
+
+        expect(result).toEqual(BERLIN_WEATHER_MOCK_DATA);
+        consoleSpy.mockRestore();
+      });
+
+      it("should handle API rate limiting", async () => {
+        const consoleSpy = jest.spyOn(console, "log").mockImplementation();
+        mockedAxios.get.mockRejectedValueOnce(
+          new Error("429 Too Many Requests")
+        );
+
+        const processedData = { latitude: 52.52, longitude: 13.405 };
+        const result = await weatherService.fetchData(processedData);
+
+        expect(result).toEqual(BERLIN_WEATHER_MOCK_DATA);
+        consoleSpy.mockRestore();
+      });
+    });
+
+    describe("when internet is not available", () => {
+      beforeEach(() => {
+        mockedCheckInternetConnectivity.mockResolvedValue(false);
+      });
+
+      it("should return mock data without making API call", async () => {
+        const consoleSpy = jest.spyOn(console, "log").mockImplementation();
+
+        const processedData = { latitude: 52.52, longitude: 13.405 };
+        const result = await weatherService.fetchData(processedData);
+
+        expect(mockedCheckInternetConnectivity).toHaveBeenCalledTimes(1);
+        expect(mockedAxios.get).not.toHaveBeenCalled();
+        expect(consoleSpy).toHaveBeenCalledWith(
+          "No internet connectivity detected, returning mock weather data for Berlin"
+        );
+        expect(result).toEqual(BERLIN_WEATHER_MOCK_DATA);
+        consoleSpy.mockRestore();
+      });
+
+      it("should return mock data for any coordinates when offline", async () => {
+        const consoleSpy = jest.spyOn(console, "log").mockImplementation();
+
+        const processedData = { latitude: -33.9249, longitude: 18.4241 };
+        const result = await weatherService.fetchData(processedData);
+
+        expect(result).toEqual(BERLIN_WEATHER_MOCK_DATA);
+        consoleSpy.mockRestore();
+      });
+    });
+
+    describe("error handling", () => {
+      it("should handle connectivity check failure", async () => {
+        const consoleSpy = jest.spyOn(console, "log").mockImplementation();
+        mockedCheckInternetConnectivity.mockRejectedValueOnce(
+          new Error("Connectivity check failed")
+        );
+
+        const processedData = { latitude: 52.52, longitude: 13.405 };
+        const result = await weatherService.fetchData(processedData);
+
+        expect(result).toEqual(BERLIN_WEATHER_MOCK_DATA);
+        consoleSpy.mockRestore();
+      });
+
+      it("should handle malformed API response", async () => {
+        const consoleSpy = jest.spyOn(console, "log").mockImplementation();
+        mockedCheckInternetConnectivity.mockResolvedValue(true);
+        mockedAxios.get.mockResolvedValueOnce({
+          data: null,
+        });
+
+        const processedData = { latitude: 52.52, longitude: 13.405 };
+        const result = await weatherService.fetchData(processedData);
+
+        expect(result).toEqual(null);
+        consoleSpy.mockRestore();
+      });
+
+      it("should handle API returning invalid JSON", async () => {
+        const consoleSpy = jest.spyOn(console, "log").mockImplementation();
+        mockedCheckInternetConnectivity.mockResolvedValue(true);
+        mockedAxios.get.mockRejectedValueOnce(new Error("Invalid JSON"));
+
+        const processedData = { latitude: 52.52, longitude: 13.405 };
+        const result = await weatherService.fetchData(processedData);
+
+        expect(result).toEqual(BERLIN_WEATHER_MOCK_DATA);
+        consoleSpy.mockRestore();
+      });
+    });
+
+    describe("edge cases", () => {
+      it("should handle very precise coordinates", async () => {
+        mockedCheckInternetConnectivity.mockResolvedValue(true);
+        mockedAxios.get.mockResolvedValueOnce({
+          data: mockWeatherData,
+        });
+
+        const processedData = {
+          latitude: 52.520008,
+          longitude: 13.404954,
+        };
+        await weatherService.fetchData(processedData);
+
+        expect(mockedAxios.get).toHaveBeenCalledWith(
+          "https://api.open-meteo.com/v1/forecast?latitude=52.520008&longitude=13.404954&current=temperature_2m,wind_speed_10m"
+        );
+      });
+
+      it("should handle zero coordinates", async () => {
+        mockedCheckInternetConnectivity.mockResolvedValue(true);
+        mockedAxios.get.mockResolvedValueOnce({
+          data: mockWeatherData,
+        });
+
+        const processedData = { latitude: 0, longitude: 0 };
+        await weatherService.fetchData(processedData);
+
+        expect(mockedAxios.get).toHaveBeenCalledWith(
+          "https://api.open-meteo.com/v1/forecast?latitude=0&longitude=0&current=temperature_2m,wind_speed_10m"
+        );
+      });
+
+      it("should handle coordinates at the international date line", async () => {
+        mockedCheckInternetConnectivity.mockResolvedValue(true);
+        mockedAxios.get.mockResolvedValueOnce({
+          data: mockWeatherData,
+        });
+
+        const processedData = { latitude: 0, longitude: 180 };
+        await weatherService.fetchData(processedData);
+
+        expect(mockedAxios.get).toHaveBeenCalledWith(
+          "https://api.open-meteo.com/v1/forecast?latitude=0&longitude=180&current=temperature_2m,wind_speed_10m"
+        );
+      });
+
+      it("should handle coordinates at the antimeridian", async () => {
+        mockedCheckInternetConnectivity.mockResolvedValue(true);
+        mockedAxios.get.mockResolvedValueOnce({
+          data: mockWeatherData,
+        });
+
+        const processedData = { latitude: 0, longitude: -180 };
+        await weatherService.fetchData(processedData);
+
+        expect(mockedAxios.get).toHaveBeenCalledWith(
+          "https://api.open-meteo.com/v1/forecast?latitude=0&longitude=-180&current=temperature_2m,wind_speed_10m"
+        );
       });
     });
   });
