@@ -329,10 +329,10 @@ export default function StatusPage() {
                 <strong>ID:</strong> {selectedJob?.id}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                <strong>Type:</strong> {selectedJob?.type}
+                <strong>Type:</strong> {capitalize(selectedJob?.type || "")}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                <strong>Status:</strong> {selectedJob?.status}
+                <strong>Status:</strong> {capitalize(selectedJob?.status || "")}
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 <strong>Created:</strong>{" "}

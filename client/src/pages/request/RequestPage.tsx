@@ -15,7 +15,7 @@ export default function RequestPage() {
     <Box
       sx={{
         display: "flex",
-        flexDirection: "column",
+        flexDirection: "row",
         gap: "16px",
         marginBottom: "16px",
       }}
