@@ -24,7 +24,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useTenant } from "../../contexts/TenantContext";
 import InvalidTenant from "../../components/InvalidTenant";
 import { useState, useEffect } from "react";
-import { ROUTES } from "../../constants";
+import { ROUTES, JOB_TYPES, type JobType } from "../../constants";
 
 interface Job {
   id: string;
@@ -32,7 +32,7 @@ interface Job {
   createdDate: string;
   scheduledDate: string;
   status: "completed" | "scheduled" | "failed";
-  type: "weather" | "countries";
+  type: JobType;
   tenantId: string;
   data?: any;
 }
@@ -42,9 +42,7 @@ export default function StatusPage() {
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [selectedFilter, setSelectedFilter] = useState<
-    "all" | "weather" | "countries"
-  >("all");
+  const [selectedFilter, setSelectedFilter] = useState<"all" | JobType>("all");
 
   // Update clock every second
   useEffect(() => {
@@ -212,14 +210,18 @@ export default function StatusPage() {
             All
           </Button>
           <Button
-            variant={selectedFilter === "countries" ? "contained" : "outlined"}
-            onClick={() => setSelectedFilter("countries")}
+            variant={
+              selectedFilter === JOB_TYPES.COUNTRIES ? "contained" : "outlined"
+            }
+            onClick={() => setSelectedFilter(JOB_TYPES.COUNTRIES)}
           >
             Countries
           </Button>
           <Button
-            variant={selectedFilter === "weather" ? "contained" : "outlined"}
-            onClick={() => setSelectedFilter("weather")}
+            variant={
+              selectedFilter === JOB_TYPES.WEATHER ? "contained" : "outlined"
+            }
+            onClick={() => setSelectedFilter(JOB_TYPES.WEATHER)}
           >
             Weather
           </Button>

@@ -5,6 +5,11 @@ export const ROUTES = {
   STATUS: "status",
 } as const;
 
+export const JOB_TYPES = {
+  WEATHER: "weather",
+  COUNTRIES: "countries",
+} as const;
+
 // List of all countries in the world in English
 export const COUNTRIES = [
   "Afghanistan",
@@ -205,3 +210,4 @@ export const COUNTRIES = [
 
 export type Tenant = (typeof TENANTS)[number];
 export type CountryName = (typeof COUNTRIES)[number];
+export type JobType = (typeof JOB_TYPES)[keyof typeof JOB_TYPES];

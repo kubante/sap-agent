@@ -3,6 +3,7 @@ import { screen, waitFor } from "@testing-library/dom";
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { useState } from "react";
+import { JOB_TYPES } from "../../../constants";
 
 // Mock the component to avoid complex dayjs issues
 const MockCountryFetcher = ({ tenant }: { tenant: string }) => {
@@ -31,7 +32,7 @@ const MockCountryFetcher = ({ tenant }: { tenant: string }) => {
           name: selectedCountry,
           scheduledDate: "2024-01-01T10:00:00.000Z",
           tenantId: tenant,
-          type: "countries",
+          type: JOB_TYPES.COUNTRIES,
           data: {
             countryName: selectedCountry,
           },
@@ -162,7 +163,7 @@ describe("CountryFetcher - Simple", () => {
           name: "Germany",
           scheduledDate: "2024-01-01T10:00:00.000Z",
           tenantId: "test-tenant",
-          type: "countries",
+          type: JOB_TYPES.COUNTRIES,
           data: {
             countryName: "Germany",
           },

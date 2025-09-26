@@ -15,7 +15,7 @@ import { useState } from "react";
 import type { Dayjs } from "dayjs";
 import dayjs from "dayjs";
 import { capitalize } from "lodash";
-import { COUNTRIES } from "../../constants";
+import { COUNTRIES, JOB_TYPES } from "../../constants";
 
 interface CountryFetcherProps {
   tenant: string;
@@ -48,7 +48,7 @@ export default function CountryFetcher({ tenant }: CountryFetcherProps) {
           name: selectedCountry,
           scheduledDate: scheduledTime.toISOString(),
           tenantId: tenant,
-          type: "countries",
+          type: JOB_TYPES.COUNTRIES,
           data: {
             countryName: selectedCountry,
           },

@@ -18,6 +18,7 @@ import { useState } from "react";
 import type { Dayjs } from "dayjs";
 import dayjs from "dayjs";
 import { capitalize } from "lodash";
+import { JOB_TYPES } from "../../constants";
 
 interface WeatherFetcherProps {
   tenant: string;
@@ -71,7 +72,7 @@ export default function WeatherFetcher({ tenant }: WeatherFetcherProps) {
           name: selectedCity ? `${selectedCity}` : `${latitude}, ${longitude}`,
           scheduledDate: scheduledTime.toISOString(),
           tenantId: tenant,
-          type: "weather",
+          type: JOB_TYPES.WEATHER,
           data: {
             latitude: parseFloat(latitude),
             longitude: parseFloat(longitude),

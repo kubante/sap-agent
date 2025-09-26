@@ -2,6 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { useState } from "react";
+import { JOB_TYPES } from "../../../constants";
 
 // Mock the component to avoid complex dayjs issues
 const MockWeatherFetcher = ({ tenant }: { tenant: string }) => {
@@ -48,7 +49,7 @@ const MockWeatherFetcher = ({ tenant }: { tenant: string }) => {
           name: selectedCity ? `${selectedCity}` : `${latitude}, ${longitude}`,
           scheduledDate: "2024-01-01T10:00:00.000Z",
           tenantId: tenant,
-          type: "weather",
+          type: JOB_TYPES.WEATHER,
           data: {
             latitude: parseFloat(latitude),
             longitude: parseFloat(longitude),
@@ -216,7 +217,7 @@ describe("WeatherFetcher - Simple", () => {
           name: "52.52, 13.405",
           scheduledDate: "2024-01-01T10:00:00.000Z",
           tenantId: "test-tenant",
-          type: "weather",
+          type: JOB_TYPES.WEATHER,
           data: {
             latitude: 52.52,
             longitude: 13.405,
@@ -251,7 +252,7 @@ describe("WeatherFetcher - Simple", () => {
           name: "Berlin",
           scheduledDate: "2024-01-01T10:00:00.000Z",
           tenantId: "test-tenant",
-          type: "weather",
+          type: JOB_TYPES.WEATHER,
           data: {
             latitude: 52.52,
             longitude: 13.405,
