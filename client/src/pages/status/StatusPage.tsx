@@ -18,6 +18,7 @@ import {
   Box,
   IconButton,
   ButtonGroup,
+  capitalize,
 } from "@mui/material";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -179,7 +180,7 @@ export default function StatusPage() {
       >
         <Box>
           <Typography variant="h4" gutterBottom>
-            Status Page for {tenant}
+            Status Page for {capitalize(tenant)}
           </Typography>
           <Typography variant="body1">
             View the status of your requests for tenant: {tenant}
@@ -340,7 +341,7 @@ export default function StatusPage() {
                   : ""}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                <strong>Executed:</strong>{" "}
+                <strong>Scheduled:</strong>{" "}
                 {selectedJob
                   ? new Date(selectedJob.scheduledDate).toLocaleString()
                   : ""}

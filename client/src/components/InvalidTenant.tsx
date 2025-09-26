@@ -1,7 +1,6 @@
-import { Paper, Typography, Button, Box } from "@mui/material";
+import { Paper, Typography, Button, Box, capitalize } from "@mui/material";
 import { Link } from "react-router-dom";
 import { TENANTS } from "../constants";
-import { capitalize } from "lodash";
 
 export default function InvalidTenant() {
   return (

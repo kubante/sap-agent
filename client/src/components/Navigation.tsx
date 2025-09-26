@@ -1,8 +1,14 @@
 import { Link, useLocation } from "react-router-dom";
-import { AppBar, Toolbar, Typography, Button, Box } from "@mui/material";
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Button,
+  Box,
+  capitalize,
+} from "@mui/material";
 import { useTenant } from "../contexts/TenantContext";
 import { ROUTES } from "../constants";
-import { capitalize } from "lodash";
 
 export default function Navigation() {
   const location = useLocation();
