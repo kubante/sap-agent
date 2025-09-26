@@ -1,4 +1,4 @@
-import type { JobType } from "./constants";
+import type { JOB_TYPES } from "./constants";
 
 // Job interface for the job management system
 export interface Job {
@@ -11,3 +11,5 @@ export interface Job {
   tenantId: string;
   data?: any;
 }
+
+export type JobType = (typeof JOB_TYPES)[keyof typeof JOB_TYPES];

@@ -1,8 +1,8 @@
-import { JOB_TYPES, type JobType } from "../constants";
+import { JOB_TYPES } from "../constants";
 import { CountryDataService } from "../services/countries/country-service";
 import { serviceRegistry } from "../services/service-registry";
 import { WeatherDataService } from "../services/weather/weather-service";
-import { Job } from "../types";
+import { Job, type JobType } from "../types";
 
 // Mock the job executor to avoid actual execution during tests
 jest.mock("../job-executor", () => ({
