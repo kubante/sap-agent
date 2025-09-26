@@ -1,3 +1,4 @@
+import { JOB_TYPES } from "../constants";
 import { DataService } from "./common/service-interface";
 import { CountryDataService } from "./countries/country-service";
 import { WeatherDataService } from "./weather/weather-service";
@@ -8,8 +9,8 @@ export class ServiceRegistry {
 
   constructor() {
     // Register services
-    this.services.set("weather", new WeatherDataService());
-    this.services.set("countries", new CountryDataService());
+    this.services.set(JOB_TYPES.WEATHER, new WeatherDataService());
+    this.services.set(JOB_TYPES.COUNTRIES, new CountryDataService());
   }
 
   /**

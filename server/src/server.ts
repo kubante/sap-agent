@@ -1,4 +1,5 @@
 import express from "express";
+import { JOB_TYPES } from "./constants";
 import { executeJob } from "./job-executor";
 import { serviceRegistry } from "./services/service-registry";
 import { Job } from "./types";
@@ -28,7 +29,7 @@ app.get("/api/jobs", (req, res) => {
   // If type is provided, filter by type as well
   if (type) {
     const typeStr = Array.isArray(type) ? type[0] : type;
-    if (typeStr === "weather" || typeStr === "countries") {
+    if (typeStr === JOB_TYPES.WEATHER || typeStr === JOB_TYPES.COUNTRIES) {
       filteredJobs = filteredJobs.filter((job) => job.type === typeStr);
     }
   }

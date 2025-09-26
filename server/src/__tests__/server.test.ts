@@ -1,3 +1,4 @@
+import { JOB_TYPES, type JobType } from "../constants";
 import { CountryDataService } from "../services/countries/country-service";
 import { serviceRegistry } from "../services/service-registry";
 import { WeatherDataService } from "../services/weather/weather-service";
@@ -12,7 +13,7 @@ jest.mock("../job-executor", () => ({
 jest.mock("../services/service-registry", () => ({
   serviceRegistry: {
     getService: jest.fn(),
-    getAvailableTypes: jest.fn(() => ["weather", "countries"]),
+    getAvailableTypes: jest.fn(() => [JOB_TYPES.WEATHER, JOB_TYPES.COUNTRIES]),
   },
 }));
 
@@ -48,7 +49,7 @@ describe("Server API Logic", () => {
         createdDate: new Date("2024-01-01"),
         scheduledDate: new Date("2024-01-01"),
         status: "completed",
-        type: "weather",
+        type: JOB_TYPES.WEATHER,
         tenantId: "tenant1",
         data: { latitude: "52.5200", longitude: "13.4050" },
       },
@@ -58,7 +59,7 @@ describe("Server API Logic", () => {
         createdDate: new Date("2024-01-01"),
         scheduledDate: new Date("2024-01-01"),
         status: "scheduled",
-        type: "countries",
+        type: JOB_TYPES.COUNTRIES,
         tenantId: "tenant1",
         data: { countryName: "Germany" },
       },
@@ -68,7 +69,7 @@ describe("Server API Logic", () => {
         createdDate: new Date("2024-01-01"),
         scheduledDate: new Date("2024-01-01"),
         status: "scheduled",
-        type: "weather",
+        type: JOB_TYPES.WEATHER,
         tenantId: "tenant2",
         data: { latitude: "40.7128", longitude: "-74.0060" },
       },
@@ -88,12 +89,12 @@ describe("Server API Logic", () => {
 
     it("should return jobs filtered by tenantId and type", () => {
       const tenantId = "tenant1";
-      const type = "weather";
+      const type = JOB_TYPES.WEATHER;
       let filteredJobs = jobs.filter((job) => job.tenantId === tenantId);
       filteredJobs = filteredJobs.filter((job) => job.type === type);
 
       expect(filteredJobs).toHaveLength(1);
-      expect(filteredJobs[0].type).toBe("weather");
+      expect(filteredJobs[0].type).toBe(JOB_TYPES.WEATHER);
       expect(filteredJobs[0].tenantId).toBe("tenant1");
     });
 
@@ -115,13 +116,13 @@ describe("Server API Logic", () => {
 
     it("should handle array type parameter", () => {
       const tenantId = "tenant1";
-      const type = ["weather"];
+      const type = [JOB_TYPES.WEATHER];
       let filteredJobs = jobs.filter((job) => job.tenantId === tenantId);
       const typeStr = Array.isArray(type) ? type[0] : type;
       filteredJobs = filteredJobs.filter((job) => job.type === typeStr);
 
       expect(filteredJobs).toHaveLength(1);
-      expect(filteredJobs[0].type).toBe("weather");
+      expect(filteredJobs[0].type).toBe(JOB_TYPES.WEATHER);
     });
   });
 
@@ -129,7 +130,7 @@ describe("Server API Logic", () => {
     const validWeatherJob = {
       name: "Weather Job",
       scheduledDate: "2024-12-31T10:00:00Z",
-      type: "weather",
+      type: JOB_TYPES.WEATHER,
       tenantId: "tenant1",
       data: { latitude: "52.5200", longitude: "13.4050" },
     };
@@ -137,7 +138,7 @@ describe("Server API Logic", () => {
     const validCountryJob = {
       name: "Country Job",
       scheduledDate: "2024-12-31T10:00:00Z",
-      type: "countries",
+      type: JOB_TYPES.COUNTRIES,
       tenantId: "tenant1",
       data: { countryName: "Germany" },
     };
@@ -159,7 +160,7 @@ describe("Server API Logic", () => {
         createdDate: new Date(),
         scheduledDate: new Date(validWeatherJob.scheduledDate),
         status: "scheduled",
-        type: validWeatherJob.type as "weather" | "countries",
+        type: validWeatherJob.type as JobType,
         tenantId: validWeatherJob.tenantId,
         data: validWeatherJob.data,
       };
@@ -168,7 +169,7 @@ describe("Server API Logic", () => {
 
       expect(jobs).toHaveLength(1);
       expect(jobs[0].name).toBe(validWeatherJob.name);
-      expect(jobs[0].type).toBe("weather");
+      expect(jobs[0].type).toBe(JOB_TYPES.WEATHER);
       expect(jobs[0].tenantId).toBe("tenant1");
     });
 
@@ -189,7 +190,7 @@ describe("Server API Logic", () => {
         createdDate: new Date(),
         scheduledDate: new Date(validCountryJob.scheduledDate),
         status: "scheduled",
-        type: validCountryJob.type as "weather" | "countries",
+        type: validCountryJob.type as JobType,
         tenantId: validCountryJob.tenantId,
         data: validCountryJob.data,
       };
@@ -198,7 +199,7 @@ describe("Server API Logic", () => {
 
       expect(jobs).toHaveLength(1);
       expect(jobs[0].name).toBe(validCountryJob.name);
-      expect(jobs[0].type).toBe("countries");
+      expect(jobs[0].type).toBe(JOB_TYPES.COUNTRIES);
       expect(jobs[0].tenantId).toBe("tenant1");
     });
 
@@ -237,8 +238,8 @@ describe("Server API Logic", () => {
 
       (serviceRegistry.getService as jest.Mock).mockReturnValue(null);
       (serviceRegistry.getAvailableTypes as jest.Mock).mockReturnValue([
-        "weather",
-        "countries",
+        JOB_TYPES.WEATHER,
+        JOB_TYPES.COUNTRIES,
       ]);
 
       const service = serviceRegistry.getService(invalidJob.type);
@@ -249,7 +250,7 @@ describe("Server API Logic", () => {
       const invalidJob = {
         name: "Test Job",
         scheduledDate: "2024-12-31T10:00:00Z",
-        type: "weather",
+        type: JOB_TYPES.WEATHER,
         tenantId: "tenant1",
         data: { latitude: "invalid", longitude: "invalid" },
       };
@@ -341,7 +342,7 @@ describe("Server API Logic", () => {
         mockWeatherService
       );
 
-      const service = serviceRegistry.getService("weather");
+      const service = serviceRegistry.getService(JOB_TYPES.WEATHER);
       expect(service).toBe(mockWeatherService);
     });
 
@@ -350,7 +351,7 @@ describe("Server API Logic", () => {
         mockCountryService
       );
 
-      const service = serviceRegistry.getService("countries");
+      const service = serviceRegistry.getService(JOB_TYPES.COUNTRIES);
       expect(service).toBe(mockCountryService);
     });
 
@@ -363,12 +364,12 @@ describe("Server API Logic", () => {
 
     it("should return available service types", () => {
       (serviceRegistry.getAvailableTypes as jest.Mock).mockReturnValue([
-        "weather",
-        "countries",
+        JOB_TYPES.WEATHER,
+        JOB_TYPES.COUNTRIES,
       ]);
 
       const types = serviceRegistry.getAvailableTypes();
-      expect(types).toEqual(["weather", "countries"]);
+      expect(types).toEqual([JOB_TYPES.WEATHER, JOB_TYPES.COUNTRIES]);
     });
   });
 
@@ -397,7 +398,7 @@ describe("Server API Logic", () => {
 
     it("should handle service not found error", () => {
       const invalidType = "invalid-service";
-      const availableTypes = ["weather", "countries"];
+      const availableTypes = [JOB_TYPES.WEATHER, JOB_TYPES.COUNTRIES];
 
       const errorMessage = `Invalid job type "${invalidType}". Available types: ${availableTypes.join(
         ", "

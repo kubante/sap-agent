@@ -1,3 +1,5 @@
+import type { JobType } from "./constants";
+
 // Job interface for the job management system
 export interface Job {
   id: string;
@@ -5,7 +7,7 @@ export interface Job {
   createdDate: Date;
   scheduledDate: Date;
   status: "completed" | "scheduled" | "failed";
-  type: "weather" | "countries";
+  type: JobType;
   tenantId: string;
   data?: any;
 }
