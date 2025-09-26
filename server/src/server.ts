@@ -1,4 +1,5 @@
 import express from "express";
+import { v4 as uuidv4 } from "uuid";
 import { JOB_STATUS, JOB_TYPES } from "./constants";
 import { executeJob } from "./job-executor";
 import { serviceRegistry } from "./services/service-registry";
@@ -71,7 +72,7 @@ app.post("/api/job", async (req, res) => {
 
   // Create new job
   const newJob: Job = {
-    id: Date.now().toString(), // Simple ID generation
+    id: uuidv4(), // UUID generation for collision-safe IDs
     name,
     createdDate: new Date(),
     scheduledDate:

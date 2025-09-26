@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from "uuid";
 import { JOB_STATUS, JOB_TYPES } from "../constants";
 import { CountryDataService } from "../services/countries/country-service";
 import { serviceRegistry } from "../services/service-registry";
@@ -155,7 +156,7 @@ describe("Server API Logic", () => {
       });
 
       const newJob: Job = {
-        id: Date.now().toString(),
+        id: uuidv4(),
         name: validWeatherJob.name,
         createdDate: new Date(),
         scheduledDate: new Date(validWeatherJob.scheduledDate),
@@ -185,7 +186,7 @@ describe("Server API Logic", () => {
       });
 
       const newJob: Job = {
-        id: Date.now().toString(),
+        id: uuidv4(),
         name: validCountryJob.name,
         createdDate: new Date(),
         scheduledDate: new Date(validCountryJob.scheduledDate),
@@ -305,17 +306,6 @@ describe("Server API Logic", () => {
       const adjustedDate = pastDate < now ? now : pastDate;
 
       expect(adjustedDate.getTime()).toBeGreaterThanOrEqual(now.getTime());
-    });
-  });
-
-  describe("Job ID generation", () => {
-    it("should generate unique IDs", () => {
-      const id1 = Date.now().toString();
-      const id2 = (Date.now() + 1).toString();
-
-      expect(id1).not.toBe(id2);
-      expect(typeof id1).toBe("string");
-      expect(typeof id2).toBe("string");
     });
   });
 
