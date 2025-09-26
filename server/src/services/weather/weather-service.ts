@@ -32,7 +32,7 @@ export class WeatherDataService
 
       // Fetch live data from API
       const response = await axios.get(
-        `https://api.open-meteo.com/v1/forecast?latitude=${processedData.latitude}&longitude=${processedData.longitude}&current=temperature_2m,wind_speed_10m&hourly=temperature_2m,relative_humidity_2m,wind_speed_10m`
+        `https://api.open-meteo.com/v1/forecast?latitude=${processedData.latitude}&longitude=${processedData.longitude}&current=temperature_2m,wind_speed_10m`
       );
       return response.data;
     } catch (error) {

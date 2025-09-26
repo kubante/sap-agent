@@ -6,7 +6,7 @@ import {
   ValidationError,
   ValidationResult,
 } from "../common/service-interface";
-import { COUNTRIES } from "./countries";
+import { COUNTRIES } from "./constants";
 import { CountryData, CountryProcessedData } from "./types";
 
 export class CountryDataService
