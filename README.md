@@ -160,7 +160,7 @@ The frontend polls the server every 5s for job status updates.
 
 ## 🔧 Adding New Services
 
-To add new services, follow the instructions in [server/test-agnostic-system.md](server/test-agnostic-system.md):
+To add new services:
 
 1. **Create Service Class**: Implement the `DataService` interface
 2. **Register Service**: Add to the service registry
@@ -230,13 +230,21 @@ sap-agent/
 
 1. Clone the repository
 2. Install dependencies for both client and server
-3. Start both applications
-4. Visit `http://localhost:5173` to access the application
-5. Navigate to different tenant paths to see multi-tenant functionality
+3. **Set up environment files:**
+
+   ```bash
+   # Copy environment templates
+   cp server/.env.example server/.env
+   cp client/.env.example client/.env
+   ```
+
+4. Start both applications
+5. Visit `http://localhost:5173` to access the application
+6. Navigate to different tenant paths to see multi-tenant functionality
 
 ## 📚 Additional Documentation
 
 - [Client Testing Guide](client/TESTING.md) - Comprehensive testing instructions for the frontend
 - [Server Testing Guide](server/TESTING.md) - Testing instructions for the backend
-- [Agnostic System Guide](server/test-agnostic-system.md) - How to add new services to the agent
+
 

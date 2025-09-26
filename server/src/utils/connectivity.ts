@@ -6,9 +6,13 @@ import axios from "axios";
  */
 export async function checkInternetConnectivity(): Promise<boolean> {
   try {
-    // Try to reach a reliable external service with a short timeout
-    await axios.get("https://httpbin.org/status/200", {
-      timeout: 5000, // 5 second timeout
+    const checkUrl =
+      process.env.CONNECTIVITY_CHECK_URL || "https://httpbin.org/status/200";
+    const timeout = parseInt(process.env.CONNECTIVITY_TIMEOUT || "5000");
+
+    // Try to reach a reliable external service with configurable timeout
+    await axios.get(checkUrl, {
+      timeout,
     });
     return true;
   } catch (error) {

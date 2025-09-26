@@ -1,3 +1,4 @@
+import "dotenv/config";
 import express from "express";
 import { v4 as uuidv4 } from "uuid";
 import { JOB_STATUS, JOB_TYPES } from "./constants";
@@ -10,6 +11,8 @@ const jobs: Job[] = [];
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const API_TIMEOUT = parseInt(process.env.API_TIMEOUT || "5000");
+const POLLING_INTERVAL = parseInt(process.env.POLLING_INTERVAL || "5000");
 
 // Middleware for handling json
 app.use(express.json());

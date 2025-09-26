@@ -32,10 +32,10 @@ export class CountryDataService
       }
 
       // Fetch live data from API
+      const apiUrl =
+        process.env.COUNTRIES_API_URL || "https://restcountries.com/v3.1/name";
       const response = await axios.get(
-        `https://restcountries.com/v3.1/name/${encodeURIComponent(
-          processedData.countryName
-        )}`
+        `${apiUrl}/${encodeURIComponent(processedData.countryName)}`
       );
       return response.data;
     } catch (error) {

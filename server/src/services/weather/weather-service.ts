@@ -31,8 +31,10 @@ export class WeatherDataService
       }
 
       // Fetch live data from API
+      const apiUrl =
+        process.env.WEATHER_API_URL || "https://api.open-meteo.com/v1/forecast";
       const response = await axios.get(
-        `https://api.open-meteo.com/v1/forecast?latitude=${processedData.latitude}&longitude=${processedData.longitude}&current=temperature_2m,wind_speed_10m`
+        `${apiUrl}?latitude=${processedData.latitude}&longitude=${processedData.longitude}&current=temperature_2m,wind_speed_10m`
       );
       return response.data;
     } catch (error) {
