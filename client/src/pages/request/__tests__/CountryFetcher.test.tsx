@@ -2,101 +2,153 @@ import { render } from "@testing-library/react";
 import { screen, waitFor } from "@testing-library/dom";
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { useState } from "react";
+import CountryFetcher from "../CountryFetcher";
 import { JOB_TYPES } from "../../../constants";
-
-// Mock the component to avoid complex dayjs issues
-const MockCountryFetcher = ({ tenant }: { tenant: string }) => {
-  const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
-
-  const handleSubmit = async () => {
-    if (!selectedCountry) {
-      setError("Please fill in all required fields");
-      return;
-    }
-
-    setIsLoading(true);
-    setError(null);
-    setSuccess(null);
-
-    try {
-      const response = await fetch("/api/job", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: selectedCountry,
-          scheduledDate: "2024-01-01T10:00:00.000Z",
-          tenantId: tenant,
-          type: JOB_TYPES.COUNTRIES,
-          data: {
-            countryName: selectedCountry,
-          },
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to create job");
-      }
-
-      const jobData = await response.json();
-      setSuccess(`Job created successfully! ID: ${jobData.id}`);
-      setSelectedCountry(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  return (
-    <div>
-      <h1>Fetch Country Data for {tenant}</h1>
-      <input
-        data-testid="country-input"
-        value={selectedCountry || ""}
-        onChange={(e) => setSelectedCountry(e.target.value)}
-        placeholder="Select Country"
-      />
-      <button
-        data-testid="submit-button"
-        onClick={handleSubmit}
-        disabled={!selectedCountry || isLoading}
-      >
-        {isLoading ? "Creating Job..." : "Create Job"}
-      </button>
-      <button
-        data-testid="clear-button"
-        onClick={() => {
-          setSelectedCountry(null);
-          setError(null);
-          setSuccess(null);
-        }}
-        disabled={isLoading}
-      >
-        Clear
-      </button>
-      {error && <div data-testid="error-message">{error}</div>}
-      {success && <div data-testid="success-message">{success}</div>}
-    </div>
-  );
-};
 
 // Mock fetch
 const mockFetch = vi.fn();
 globalThis.fetch = mockFetch;
 
-// Mock lodash
-vi.mock("lodash", () => ({
+// Mock Material-UI components to avoid complex rendering issues
+vi.mock("@mui/material", () => ({
+  Paper: ({ children, ...props }: any) => (
+    <div data-testid="paper" {...props}>
+      {children}
+    </div>
+  ),
+  Typography: ({ children, ...props }: any) => <div {...props}>{children}</div>,
+  Box: ({ children, ...props }: any) => <div {...props}>{children}</div>,
+  Button: ({ children, onClick, disabled, ...props }: any) => (
+    <button onClick={onClick} disabled={disabled} {...props}>
+      {children}
+    </button>
+  ),
+  TextField: ({ label, value, onChange, ...props }: any) => (
+    <input
+      data-testid={props["data-testid"] || "text-field"}
+      placeholder={label}
+      value={value || ""}
+      onChange={onChange}
+      {...props}
+    />
+  ),
+  Alert: ({ children, severity, ...props }: any) => (
+    <div
+      data-testid={severity === "error" ? "error-message" : "success-message"}
+      {...props}
+    >
+      {children}
+    </div>
+  ),
+  CircularProgress: () => <div data-testid="loading-spinner">Loading...</div>,
   capitalize: (str: string) => str.charAt(0).toUpperCase() + str.slice(1),
+  Autocomplete: ({ value, onChange, options, renderInput, ...props }: any) => {
+    const [inputValue, setInputValue] = React.useState("");
+    return (
+      <div>
+        {renderInput({
+          ...props,
+          value: inputValue,
+          onChange: (e: any) => setInputValue(e.target.value),
+          inputProps: {
+            "data-testid": "country-input",
+            placeholder: "Select Country",
+          },
+        })}
+        <select
+          data-testid="country-select"
+          value={value || ""}
+          onChange={(e) => onChange(null, e.target.value)}
+        >
+          <option value="">Select a country</option>
+          {options.map((option: string) => (
+            <option key={option} value={option}>
+              {option}
+            </option>
+          ))}
+        </select>
+      </div>
+    );
+  },
 }));
 
-describe("CountryFetcher - Simple", () => {
+// Mock Material-UI date picker
+vi.mock("@mui/x-date-pickers/DateTimePicker", () => ({
+  DateTimePicker: ({ value, onChange, ...props }: any) => {
+    const mockDayjs = (date?: any) => {
+      const d = date ? new Date(date) : new Date("2024-01-01T10:00:00.000Z");
+      return {
+        format: (format: string) => {
+          if (format === "YYYY-MM-DDTHH:mm") {
+            return d.toISOString().slice(0, 16);
+          }
+          return d.toISOString();
+        },
+        toISOString: () => d.toISOString(),
+        isValid: () => true,
+      };
+    };
+
+    return (
+      <input
+        data-testid="date-time-picker"
+        type="datetime-local"
+        value={value ? value.format("YYYY-MM-DDTHH:mm") : ""}
+        onChange={(e) => {
+          const newValue = e.target.value ? mockDayjs(e.target.value) : null;
+          onChange(newValue);
+        }}
+        {...props}
+      />
+    );
+  },
+}));
+
+// Mock Material-UI localization provider
+vi.mock("@mui/x-date-pickers/LocalizationProvider", () => ({
+  LocalizationProvider: ({ children }: any) => <div>{children}</div>,
+}));
+
+// Mock dayjs adapter
+vi.mock("@mui/x-date-pickers/AdapterDayjs", () => ({
+  AdapterDayjs: {},
+}));
+
+// Mock dayjs
+vi.mock("dayjs", () => {
+  const mockDayjs = (date?: any) => {
+    const d = date ? new Date(date) : new Date("2024-01-01T10:00:00.000Z");
+    return {
+      format: (format: string) => {
+        if (format === "YYYY-MM-DDTHH:mm") {
+          return d.toISOString().slice(0, 16);
+        }
+        return d.toISOString();
+      },
+      toISOString: () => d.toISOString(),
+      isValid: () => true,
+    };
+  };
+  return {
+    default: mockDayjs,
+    __esModule: true,
+  };
+});
+
+// Mock React for Autocomplete
+const React = {
+  useState: (initial: any) => {
+    let state = initial;
+    return [
+      state,
+      (newState: any) => {
+        state = newState;
+      },
+    ];
+  },
+};
+
+describe("CountryFetcher", () => {
   const mockTenant = "test-tenant";
 
   beforeEach(() => {
@@ -105,36 +157,37 @@ describe("CountryFetcher - Simple", () => {
   });
 
   it("should render the component with correct title", () => {
-    render(<MockCountryFetcher tenant={mockTenant} />);
+    render(<CountryFetcher tenant={mockTenant} />);
 
     expect(
-      screen.getByText("Fetch Country Data for test-tenant")
+      screen.getByText("Fetch Country Data for Test-tenant")
     ).toBeInTheDocument();
   });
 
   it("should render form elements", () => {
-    render(<MockCountryFetcher tenant={mockTenant} />);
+    render(<CountryFetcher tenant={mockTenant} />);
 
-    expect(screen.getByTestId("country-input")).toBeInTheDocument();
-    expect(screen.getByTestId("submit-button")).toBeInTheDocument();
-    expect(screen.getByTestId("clear-button")).toBeInTheDocument();
+    expect(screen.getByTestId("date-time-picker")).toBeInTheDocument();
+    expect(screen.getByTestId("country-select")).toBeInTheDocument();
+    expect(screen.getByText("Create Job")).toBeInTheDocument();
+    expect(screen.getByText("Clear")).toBeInTheDocument();
   });
 
   it("should have submit button disabled when form is empty", () => {
-    render(<MockCountryFetcher tenant={mockTenant} />);
+    render(<CountryFetcher tenant={mockTenant} />);
 
-    const submitButton = screen.getByTestId("submit-button");
+    const submitButton = screen.getByText("Create Job");
     expect(submitButton).toBeDisabled();
   });
 
   it("should enable submit button when form is filled", async () => {
     const user = userEvent.setup();
-    render(<MockCountryFetcher tenant={mockTenant} />);
+    render(<CountryFetcher tenant={mockTenant} />);
 
-    const countryInput = screen.getByTestId("country-input");
-    await user.type(countryInput, "Germany");
+    const countrySelect = screen.getByTestId("country-select");
+    await user.selectOptions(countrySelect, "Germany");
 
-    const submitButton = screen.getByTestId("submit-button");
+    const submitButton = screen.getByText("Create Job");
     expect(submitButton).toBeEnabled();
   });
 
@@ -145,12 +198,12 @@ describe("CountryFetcher - Simple", () => {
       json: async () => ({ id: "job-123" }),
     });
 
-    render(<MockCountryFetcher tenant={mockTenant} />);
+    render(<CountryFetcher tenant={mockTenant} />);
 
-    const countryInput = screen.getByTestId("country-input");
-    await user.type(countryInput, "Germany");
+    const countrySelect = screen.getByTestId("country-select");
+    await user.selectOptions(countrySelect, "Germany");
 
-    const submitButton = screen.getByTestId("submit-button");
+    const submitButton = screen.getByText("Create Job");
     await user.click(submitButton);
 
     await waitFor(() => {
@@ -179,12 +232,12 @@ describe("CountryFetcher - Simple", () => {
       json: async () => ({ id: "job-123" }),
     });
 
-    render(<MockCountryFetcher tenant={mockTenant} />);
+    render(<CountryFetcher tenant={mockTenant} />);
 
-    const countryInput = screen.getByTestId("country-input");
-    await user.type(countryInput, "Germany");
+    const countrySelect = screen.getByTestId("country-select");
+    await user.selectOptions(countrySelect, "Germany");
 
-    const submitButton = screen.getByTestId("submit-button");
+    const submitButton = screen.getByText("Create Job");
     await user.click(submitButton);
 
     await waitFor(() => {
@@ -201,12 +254,12 @@ describe("CountryFetcher - Simple", () => {
       json: async () => ({ error: "Validation failed" }),
     });
 
-    render(<MockCountryFetcher tenant={mockTenant} />);
+    render(<CountryFetcher tenant={mockTenant} />);
 
-    const countryInput = screen.getByTestId("country-input");
-    await user.type(countryInput, "Germany");
+    const countrySelect = screen.getByTestId("country-select");
+    await user.selectOptions(countrySelect, "Germany");
 
-    const submitButton = screen.getByTestId("submit-button");
+    const submitButton = screen.getByText("Create Job");
     await user.click(submitButton);
 
     await waitFor(() => {
@@ -232,12 +285,12 @@ describe("CountryFetcher - Simple", () => {
         )
     );
 
-    render(<MockCountryFetcher tenant={mockTenant} />);
+    render(<CountryFetcher tenant={mockTenant} />);
 
-    const countryInput = screen.getByTestId("country-input");
-    await user.type(countryInput, "Germany");
+    const countrySelect = screen.getByTestId("country-select");
+    await user.selectOptions(countrySelect, "Germany");
 
-    const submitButton = screen.getByTestId("submit-button");
+    const submitButton = screen.getByText("Create Job");
     await user.click(submitButton);
 
     expect(screen.getByText("Creating Job...")).toBeInTheDocument();
@@ -246,27 +299,27 @@ describe("CountryFetcher - Simple", () => {
 
   it("should clear form when clear button is clicked", async () => {
     const user = userEvent.setup();
-    render(<MockCountryFetcher tenant={mockTenant} />);
+    render(<CountryFetcher tenant={mockTenant} />);
 
-    const countryInput = screen.getByTestId("country-input");
-    await user.type(countryInput, "Germany");
+    const countrySelect = screen.getByTestId("country-select");
+    await user.selectOptions(countrySelect, "Germany");
 
-    const clearButton = screen.getByTestId("clear-button");
+    const clearButton = screen.getByText("Clear");
     await user.click(clearButton);
 
-    expect(countryInput).toHaveValue("");
+    expect(countrySelect).toHaveValue("");
   });
 
   it("should handle network errors", async () => {
     const user = userEvent.setup();
     mockFetch.mockRejectedValueOnce(new Error("Network error"));
 
-    render(<MockCountryFetcher tenant={mockTenant} />);
+    render(<CountryFetcher tenant={mockTenant} />);
 
-    const countryInput = screen.getByTestId("country-input");
-    await user.type(countryInput, "Germany");
+    const countrySelect = screen.getByTestId("country-select");
+    await user.selectOptions(countrySelect, "Germany");
 
-    const submitButton = screen.getByTestId("submit-button");
+    const submitButton = screen.getByText("Create Job");
     await user.click(submitButton);
 
     await waitFor(() => {
@@ -283,12 +336,12 @@ describe("CountryFetcher - Simple", () => {
       json: async () => ({ id: "job-123" }),
     });
 
-    render(<MockCountryFetcher tenant={mockTenant} />);
+    render(<CountryFetcher tenant={mockTenant} />);
 
-    const countryInput = screen.getByTestId("country-input");
-    await user.type(countryInput, "Germany");
+    const countrySelect = screen.getByTestId("country-select");
+    await user.selectOptions(countrySelect, "Germany");
 
-    const submitButton = screen.getByTestId("submit-button");
+    const submitButton = screen.getByText("Create Job");
     await user.click(submitButton);
 
     await waitFor(() => {
@@ -297,7 +350,7 @@ describe("CountryFetcher - Simple", () => {
       );
     });
 
-    expect(countryInput).toHaveValue("");
+    expect(countrySelect).toHaveValue("");
   });
 
   it("should disable clear button during loading", async () => {
@@ -316,15 +369,15 @@ describe("CountryFetcher - Simple", () => {
         )
     );
 
-    render(<MockCountryFetcher tenant={mockTenant} />);
+    render(<CountryFetcher tenant={mockTenant} />);
 
-    const countryInput = screen.getByTestId("country-input");
-    await user.type(countryInput, "Germany");
+    const countrySelect = screen.getByTestId("country-select");
+    await user.selectOptions(countrySelect, "Germany");
 
-    const submitButton = screen.getByTestId("submit-button");
+    const submitButton = screen.getByText("Create Job");
     await user.click(submitButton);
 
-    const clearButton = screen.getByTestId("clear-button");
+    const clearButton = screen.getByText("Clear");
     expect(clearButton).toBeDisabled();
   });
 });
