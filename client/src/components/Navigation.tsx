@@ -26,7 +26,9 @@ export default function Navigation() {
             component={Link} // use Link so that the user can right click and open in new tab
             to={`/${currentTenant}/${ROUTES.REQUEST}`}
             variant={
-              location.pathname === `/${ROUTES.REQUEST}` ? "outlined" : "text"
+              location.pathname.includes(`/${ROUTES.REQUEST}`)
+                ? "outlined"
+                : "text"
             }
           >
             Request
@@ -36,7 +38,9 @@ export default function Navigation() {
             component={Link}
             to={`/${currentTenant}/${ROUTES.STATUS}`}
             variant={
-              location.pathname === `/${ROUTES.STATUS}` ? "outlined" : "text"
+              location.pathname.includes(`/${ROUTES.STATUS}`)
+                ? "outlined"
+                : "text"
             }
           >
             Status
