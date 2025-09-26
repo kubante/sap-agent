@@ -1,5 +1,5 @@
 import express from "express";
-import { JOB_TYPES } from "./constants";
+import { JOB_STATUS, JOB_TYPES } from "./constants";
 import { executeJob } from "./job-executor";
 import { serviceRegistry } from "./services/service-registry";
 import { Job } from "./types";
@@ -78,7 +78,7 @@ app.post("/api/job", async (req, res) => {
       new Date(scheduledDate) < new Date()
         ? new Date()
         : new Date(scheduledDate), // to avoid having the scheduled date in the past
-    status: "scheduled",
+    status: JOB_STATUS.SCHEDULED,
     type,
     tenantId,
     data, // Store the original request data, not weather data yet

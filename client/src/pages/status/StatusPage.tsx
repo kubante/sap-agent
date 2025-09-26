@@ -25,15 +25,15 @@ import { useQuery } from "@tanstack/react-query";
 import { useTenant } from "../../contexts/TenantContext";
 import InvalidTenant from "../../components/InvalidTenant";
 import { useState, useEffect } from "react";
-import { ROUTES, JOB_TYPES } from "../../constants";
-import type { JobType } from "../../types";
+import { ROUTES, JOB_TYPES, JOB_STATUS } from "../../constants";
+import type { JobType, JobStatus } from "../../types";
 
 interface Job {
   id: string;
   name: string;
   createdDate: string;
   scheduledDate: string;
-  status: "completed" | "scheduled" | "failed";
+  status: JobStatus;
   type: JobType;
   tenantId: string;
   data?: any;
@@ -84,11 +84,11 @@ export default function StatusPage() {
 
   const getStatusColor = (status: Job["status"]) => {
     switch (status) {
-      case "completed":
+      case JOB_STATUS.COMPLETED:
         return "success";
-      case "scheduled":
+      case JOB_STATUS.SCHEDULED:
         return "warning";
-      case "failed":
+      case JOB_STATUS.FAILED:
         return "error";
       default:
         return "default";

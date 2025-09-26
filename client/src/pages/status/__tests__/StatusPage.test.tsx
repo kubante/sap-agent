@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import StatusPage from "../StatusPage";
-import { JOB_TYPES } from "../../../constants";
+import { JOB_TYPES, JOB_STATUS } from "../../../constants";
 
 // Mock the tenant context
 const mockTenant = "test-tenant";
@@ -166,7 +166,7 @@ describe("StatusPage", () => {
         id: "job-1",
         name: "Test Job",
         type: JOB_TYPES.COUNTRIES,
-        status: "completed",
+        status: JOB_STATUS.COMPLETED,
         createdDate: "2024-01-01T10:00:00.000Z",
         scheduledDate: "2024-01-01T10:00:00.000Z",
         tenantId: "test-tenant",
@@ -176,7 +176,7 @@ describe("StatusPage", () => {
         id: "job-2",
         name: "Weather Job",
         type: JOB_TYPES.WEATHER,
-        status: "scheduled",
+        status: JOB_STATUS.SCHEDULED,
         createdDate: "2024-01-01T11:00:00.000Z",
         scheduledDate: "2024-01-01T12:00:00.000Z",
         tenantId: "test-tenant",
@@ -239,7 +239,7 @@ describe("StatusPage", () => {
         id: "job-1",
         name: "Country Job",
         type: JOB_TYPES.COUNTRIES,
-        status: "completed",
+        status: JOB_STATUS.COMPLETED,
         createdDate: "2024-01-01T10:00:00.000Z",
         scheduledDate: "2024-01-01T10:00:00.000Z",
         tenantId: "test-tenant",
@@ -248,7 +248,7 @@ describe("StatusPage", () => {
         id: "job-2",
         name: "Weather Job",
         type: JOB_TYPES.WEATHER,
-        status: "scheduled",
+        status: JOB_STATUS.SCHEDULED,
         createdDate: "2024-01-01T11:00:00.000Z",
         scheduledDate: "2024-01-01T12:00:00.000Z",
         tenantId: "test-tenant",
@@ -284,7 +284,7 @@ describe("StatusPage", () => {
       id: "job-1",
       name: "Test Job",
       type: JOB_TYPES.COUNTRIES,
-      status: "completed",
+      status: JOB_STATUS.COMPLETED,
       createdDate: "2024-01-01T10:00:00.000Z",
       scheduledDate: "2024-01-01T10:00:00.000Z",
       tenantId: "test-tenant",
@@ -323,7 +323,7 @@ describe("StatusPage", () => {
       id: "job-1",
       name: "Test Job",
       type: JOB_TYPES.COUNTRIES,
-      status: "completed",
+      status: JOB_STATUS.COMPLETED,
       createdDate: "2024-01-01T10:00:00.000Z",
       scheduledDate: "2024-01-01T10:00:00.000Z",
       tenantId: "test-tenant",
@@ -364,7 +364,7 @@ describe("StatusPage", () => {
         id: "job-1",
         name: "Completed Job",
         type: JOB_TYPES.COUNTRIES,
-        status: "completed",
+        status: JOB_STATUS.COMPLETED,
         createdDate: "2024-01-01T10:00:00.000Z",
         scheduledDate: "2024-01-01T10:00:00.000Z",
         tenantId: "test-tenant",
@@ -373,7 +373,7 @@ describe("StatusPage", () => {
         id: "job-2",
         name: "Scheduled Job",
         type: JOB_TYPES.WEATHER,
-        status: "scheduled",
+        status: JOB_STATUS.SCHEDULED,
         createdDate: "2024-01-01T11:00:00.000Z",
         scheduledDate: "2024-01-01T12:00:00.000Z",
         tenantId: "test-tenant",
@@ -382,7 +382,7 @@ describe("StatusPage", () => {
         id: "job-3",
         name: "Failed Job",
         type: JOB_TYPES.COUNTRIES,
-        status: "failed",
+        status: JOB_STATUS.FAILED,
         createdDate: "2024-01-01T13:00:00.000Z",
         scheduledDate: "2024-01-01T14:00:00.000Z",
         tenantId: "test-tenant",
@@ -401,12 +401,14 @@ describe("StatusPage", () => {
       expect(chips).toHaveLength(3);
 
       const completedChip = chips.find(
-        (chip) => chip.textContent === "completed"
+        (chip) => chip.textContent === JOB_STATUS.COMPLETED
       );
       const scheduledChip = chips.find(
-        (chip) => chip.textContent === "scheduled"
+        (chip) => chip.textContent === JOB_STATUS.SCHEDULED
       );
-      const failedChip = chips.find((chip) => chip.textContent === "failed");
+      const failedChip = chips.find(
+        (chip) => chip.textContent === JOB_STATUS.FAILED
+      );
 
       expect(completedChip).toHaveAttribute("data-color", "success");
       expect(scheduledChip).toHaveAttribute("data-color", "warning");
@@ -419,7 +421,7 @@ describe("StatusPage", () => {
       id: "job-1",
       name: "Test Job",
       type: JOB_TYPES.COUNTRIES,
-      status: "completed",
+      status: JOB_STATUS.COMPLETED,
       createdDate: "2024-01-01T10:00:00.000Z",
       scheduledDate: "2024-01-01T12:00:00.000Z",
       tenantId: "test-tenant",

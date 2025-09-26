@@ -1,4 +1,4 @@
-import { JOB_TYPES } from "../constants";
+import { JOB_STATUS, JOB_TYPES } from "../constants";
 import { executeJob } from "../job-executor";
 import { serviceRegistry } from "../services/service-registry";
 import { Job } from "../types";
@@ -53,7 +53,7 @@ describe("executeJob", () => {
         name: "Weather Job",
         createdDate: new Date(),
         scheduledDate: new Date(),
-        status: "scheduled",
+        status: JOB_STATUS.SCHEDULED,
         type: JOB_TYPES.WEATHER,
         tenantId: "tenant-1",
         data: { latitude: "52.52", longitude: "13.405" },
@@ -95,7 +95,7 @@ describe("executeJob", () => {
         latitude: 52.52,
         longitude: 13.405,
       });
-      expect(job.status).toBe("completed");
+      expect(job.status).toBe(JOB_STATUS.COMPLETED);
       expect(job.data).toBe(mockWeatherData);
     });
 
@@ -105,7 +105,7 @@ describe("executeJob", () => {
         name: "Country Job",
         createdDate: new Date(),
         scheduledDate: new Date(),
-        status: "scheduled",
+        status: JOB_STATUS.SCHEDULED,
         type: JOB_TYPES.COUNTRIES,
         tenantId: "tenant-1",
         data: { countryName: "Germany" },
@@ -147,7 +147,7 @@ describe("executeJob", () => {
       expect(mockCountryService.fetchData).toHaveBeenCalledWith({
         countryName: "Germany",
       });
-      expect(job.status).toBe("completed");
+      expect(job.status).toBe(JOB_STATUS.COMPLETED);
       expect(job.data).toBe(mockCountryData);
     });
 
@@ -157,7 +157,7 @@ describe("executeJob", () => {
         name: "Empty Data Job",
         createdDate: new Date(),
         scheduledDate: new Date(),
-        status: "scheduled",
+        status: JOB_STATUS.SCHEDULED,
         type: JOB_TYPES.WEATHER,
         tenantId: "tenant-1",
         data: { latitude: "52.52", longitude: "13.405" },
@@ -173,7 +173,7 @@ describe("executeJob", () => {
 
       await executeJob(job);
 
-      expect(job.status).toBe("completed");
+      expect(job.status).toBe(JOB_STATUS.COMPLETED);
       expect(job.data).toBeUndefined();
     });
 
@@ -183,7 +183,7 @@ describe("executeJob", () => {
         name: "Status Test Job",
         createdDate: new Date(),
         scheduledDate: new Date(),
-        status: "scheduled",
+        status: JOB_STATUS.SCHEDULED,
         type: JOB_TYPES.WEATHER,
         tenantId: "tenant-1",
         data: { latitude: "52.52", longitude: "13.405" },
@@ -199,8 +199,8 @@ describe("executeJob", () => {
 
       await executeJob(job);
 
-      // Status should remain as "scheduled" during execution
-      expect(job.status).toBe("completed");
+      // Status should remain as scheduled during execution
+      expect(job.status).toBe(JOB_STATUS.COMPLETED);
     });
   });
 
@@ -211,7 +211,7 @@ describe("executeJob", () => {
         name: "Unknown Service Job",
         createdDate: new Date(),
         scheduledDate: new Date(),
-        status: "scheduled",
+        status: JOB_STATUS.SCHEDULED,
         type: "unknown" as any,
         tenantId: "tenant-1",
         data: {},
@@ -224,7 +224,7 @@ describe("executeJob", () => {
       expect(consoleSpy).toHaveBeenCalledWith(
         "Executing job job-5 (Unknown Service Job) of type unknown"
       );
-      expect(job.status).toBe("failed");
+      expect(job.status).toBe(JOB_STATUS.FAILED);
     });
   });
 
@@ -235,7 +235,7 @@ describe("executeJob", () => {
         name: "Invalid Data Job",
         createdDate: new Date(),
         scheduledDate: new Date(),
-        status: "scheduled",
+        status: JOB_STATUS.SCHEDULED,
         type: JOB_TYPES.WEATHER,
         tenantId: "tenant-1",
         data: { latitude: "invalid", longitude: "invalid" },
@@ -253,7 +253,7 @@ describe("executeJob", () => {
 
       expect(mockWeatherService.validate).toHaveBeenCalledWith(job.data);
       expect(mockWeatherService.fetchData).not.toHaveBeenCalled();
-      expect(job.status).toBe("failed");
+      expect(job.status).toBe(JOB_STATUS.FAILED);
     });
 
     it("should handle validation with single error", async () => {
@@ -262,7 +262,7 @@ describe("executeJob", () => {
         name: "Single Error Job",
         createdDate: new Date(),
         scheduledDate: new Date(),
-        status: "scheduled",
+        status: JOB_STATUS.SCHEDULED,
         type: JOB_TYPES.COUNTRIES,
         tenantId: "tenant-1",
         data: {},
@@ -275,7 +275,7 @@ describe("executeJob", () => {
 
       await executeJob(job);
 
-      expect(job.status).toBe("failed");
+      expect(job.status).toBe(JOB_STATUS.FAILED);
       expect(mockCountryService.fetchData).not.toHaveBeenCalled();
     });
   });
@@ -287,7 +287,7 @@ describe("executeJob", () => {
         name: "Fetch Error Job",
         createdDate: new Date(),
         scheduledDate: new Date(),
-        status: "scheduled",
+        status: JOB_STATUS.SCHEDULED,
         type: JOB_TYPES.WEATHER,
         tenantId: "tenant-1",
         data: { latitude: "52.52", longitude: "13.405" },
@@ -305,7 +305,7 @@ describe("executeJob", () => {
 
       await executeJob(job);
 
-      expect(job.status).toBe("failed");
+      expect(job.status).toBe(JOB_STATUS.FAILED);
     });
 
     it("should handle validation throwing error", async () => {
@@ -314,7 +314,7 @@ describe("executeJob", () => {
         name: "Validation Error Job",
         createdDate: new Date(),
         scheduledDate: new Date(),
-        status: "scheduled",
+        status: JOB_STATUS.SCHEDULED,
         type: JOB_TYPES.COUNTRIES,
         tenantId: "tenant-1",
         data: { countryName: "Germany" },
@@ -326,7 +326,7 @@ describe("executeJob", () => {
 
       await executeJob(job);
 
-      expect(job.status).toBe("failed");
+      expect(job.status).toBe(JOB_STATUS.FAILED);
     });
 
     it("should handle unexpected errors during execution", async () => {
@@ -335,7 +335,7 @@ describe("executeJob", () => {
         name: "Unexpected Error Job",
         createdDate: new Date(),
         scheduledDate: new Date(),
-        status: "scheduled",
+        status: JOB_STATUS.SCHEDULED,
         type: JOB_TYPES.WEATHER,
         tenantId: "tenant-1",
         data: { latitude: "52.52", longitude: "13.405" },
@@ -354,7 +354,7 @@ describe("executeJob", () => {
 
       await executeJob(job);
 
-      expect(job.status).toBe("failed");
+      expect(job.status).toBe(JOB_STATUS.FAILED);
     });
   });
 
@@ -365,7 +365,7 @@ describe("executeJob", () => {
         name: "Undefined Data Job",
         createdDate: new Date(),
         scheduledDate: new Date(),
-        status: "scheduled",
+        status: JOB_STATUS.SCHEDULED,
         type: JOB_TYPES.WEATHER,
         tenantId: "tenant-1",
         data: undefined,
@@ -378,7 +378,7 @@ describe("executeJob", () => {
 
       await executeJob(job);
 
-      expect(job.status).toBe("failed");
+      expect(job.status).toBe(JOB_STATUS.FAILED);
     });
 
     it("should handle job with null data", async () => {
@@ -387,7 +387,7 @@ describe("executeJob", () => {
         name: "Null Data Job",
         createdDate: new Date(),
         scheduledDate: new Date(),
-        status: "scheduled",
+        status: JOB_STATUS.SCHEDULED,
         type: JOB_TYPES.COUNTRIES,
         tenantId: "tenant-1",
         data: null,
@@ -400,7 +400,7 @@ describe("executeJob", () => {
 
       await executeJob(job);
 
-      expect(job.status).toBe("failed");
+      expect(job.status).toBe(JOB_STATUS.FAILED);
     });
 
     it("should handle job with empty data object", async () => {
@@ -409,7 +409,7 @@ describe("executeJob", () => {
         name: "Empty Data Job",
         createdDate: new Date(),
         scheduledDate: new Date(),
-        status: "scheduled",
+        status: JOB_STATUS.SCHEDULED,
         type: JOB_TYPES.WEATHER,
         tenantId: "tenant-1",
         data: {},
@@ -425,7 +425,7 @@ describe("executeJob", () => {
 
       await executeJob(job);
 
-      expect(job.status).toBe("failed");
+      expect(job.status).toBe(JOB_STATUS.FAILED);
     });
 
     it("should handle job with very large data", async () => {
@@ -440,7 +440,7 @@ describe("executeJob", () => {
         name: "Large Data Job",
         createdDate: new Date(),
         scheduledDate: new Date(),
-        status: "scheduled",
+        status: JOB_STATUS.SCHEDULED,
         type: JOB_TYPES.WEATHER,
         tenantId: "tenant-1",
         data: largeData,
@@ -456,7 +456,7 @@ describe("executeJob", () => {
 
       await executeJob(job);
 
-      expect(job.status).toBe("completed");
+      expect(job.status).toBe(JOB_STATUS.COMPLETED);
     });
   });
 
@@ -467,7 +467,7 @@ describe("executeJob", () => {
         name: "Mutation Test Job",
         createdDate: new Date(),
         scheduledDate: new Date(),
-        status: "scheduled",
+        status: JOB_STATUS.SCHEDULED,
         type: JOB_TYPES.WEATHER,
         tenantId: "tenant-1",
         data: { latitude: "52.52", longitude: "13.405" },
@@ -486,7 +486,7 @@ describe("executeJob", () => {
       await executeJob(originalJob);
 
       // Verify the original object was mutated
-      expect(jobReference.status).toBe("completed");
+      expect(jobReference.status).toBe(JOB_STATUS.COMPLETED);
       expect(jobReference.data).toEqual({ result: "success" });
       expect(originalJob).toBe(jobReference); // Same object reference
     });
@@ -498,7 +498,7 @@ describe("executeJob", () => {
         name: "Property Preservation Job",
         createdDate: originalDate,
         scheduledDate: originalDate,
-        status: "scheduled",
+        status: JOB_STATUS.SCHEDULED,
         type: JOB_TYPES.COUNTRIES,
         tenantId: "tenant-1",
         data: { countryName: "Germany" },
@@ -530,7 +530,7 @@ describe("executeJob", () => {
         name: "Concurrent Job 1",
         createdDate: new Date(),
         scheduledDate: new Date(),
-        status: "scheduled",
+        status: JOB_STATUS.SCHEDULED,
         type: JOB_TYPES.WEATHER,
         tenantId: "tenant-1",
         data: { latitude: "52.52", longitude: "13.405" },
@@ -541,7 +541,7 @@ describe("executeJob", () => {
         name: "Concurrent Job 2",
         createdDate: new Date(),
         scheduledDate: new Date(),
-        status: "scheduled",
+        status: JOB_STATUS.SCHEDULED,
         type: JOB_TYPES.COUNTRIES,
         tenantId: "tenant-1",
         data: { countryName: "Germany" },
@@ -565,8 +565,8 @@ describe("executeJob", () => {
       // Execute both jobs concurrently
       await Promise.all([executeJob(job1), executeJob(job2)]);
 
-      expect(job1.status).toBe("completed");
-      expect(job2.status).toBe("completed");
+      expect(job1.status).toBe(JOB_STATUS.COMPLETED);
+      expect(job2.status).toBe(JOB_STATUS.COMPLETED);
       expect(job1.data).toEqual({ weather: "data" });
       expect(job2.data).toEqual({ country: "data" });
     });

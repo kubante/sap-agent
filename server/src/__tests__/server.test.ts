@@ -1,4 +1,4 @@
-import { JOB_TYPES } from "../constants";
+import { JOB_STATUS, JOB_TYPES } from "../constants";
 import { CountryDataService } from "../services/countries/country-service";
 import { serviceRegistry } from "../services/service-registry";
 import { WeatherDataService } from "../services/weather/weather-service";
@@ -48,7 +48,7 @@ describe("Server API Logic", () => {
         name: "Weather Job 1",
         createdDate: new Date("2024-01-01"),
         scheduledDate: new Date("2024-01-01"),
-        status: "completed",
+        status: JOB_STATUS.COMPLETED,
         type: JOB_TYPES.WEATHER,
         tenantId: "tenant1",
         data: { latitude: "52.5200", longitude: "13.4050" },
@@ -58,7 +58,7 @@ describe("Server API Logic", () => {
         name: "Country Job 1",
         createdDate: new Date("2024-01-01"),
         scheduledDate: new Date("2024-01-01"),
-        status: "scheduled",
+        status: JOB_STATUS.SCHEDULED,
         type: JOB_TYPES.COUNTRIES,
         tenantId: "tenant1",
         data: { countryName: "Germany" },
@@ -68,7 +68,7 @@ describe("Server API Logic", () => {
         name: "Weather Job 2",
         createdDate: new Date("2024-01-01"),
         scheduledDate: new Date("2024-01-01"),
-        status: "scheduled",
+        status: JOB_STATUS.SCHEDULED,
         type: JOB_TYPES.WEATHER,
         tenantId: "tenant2",
         data: { latitude: "40.7128", longitude: "-74.0060" },
@@ -159,7 +159,7 @@ describe("Server API Logic", () => {
         name: validWeatherJob.name,
         createdDate: new Date(),
         scheduledDate: new Date(validWeatherJob.scheduledDate),
-        status: "scheduled",
+        status: JOB_STATUS.SCHEDULED,
         type: validWeatherJob.type as JobType,
         tenantId: validWeatherJob.tenantId,
         data: validWeatherJob.data,
@@ -189,7 +189,7 @@ describe("Server API Logic", () => {
         name: validCountryJob.name,
         createdDate: new Date(),
         scheduledDate: new Date(validCountryJob.scheduledDate),
-        status: "scheduled",
+        status: JOB_STATUS.SCHEDULED,
         type: validCountryJob.type as JobType,
         tenantId: validCountryJob.tenantId,
         data: validCountryJob.data,
